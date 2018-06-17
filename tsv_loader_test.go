@@ -5,7 +5,7 @@ import "testing"
 func Benchmark_loadData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		t, _, _ := readData("hn_logs.tsv")
-		t.ComputeTops()
+		t.ComputeSortedURLs()
 	}
 }
 
@@ -18,7 +18,7 @@ func Benchmark_computeTops(b *testing.B) {
 	t, _, _ := readData("hn_logs.tsv")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		t.ComputeTops()
+		t.ComputeSortedURLs()
 	}
 }
 

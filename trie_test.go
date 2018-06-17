@@ -14,8 +14,6 @@ func makeTestTrie() Trie {
 
 func TestTrie_ComputeTops(t *testing.T) {
 	trie := makeTestTrie()
-	trie.ComputeTops()
-
-	
+	trie.ComputeSortedURLs()
 
 }

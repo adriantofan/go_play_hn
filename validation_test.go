@@ -16,6 +16,7 @@ var (
 func loadRealData() (Trie, int, int) {
 	loadOnce.Do(func() {
 		trie, lineCount, errorCount = readData("hn_logs.tsv")
+		trie.ComputeSortedURLs()
 	})
 	return trie, lineCount, errorCount
 
@@ -32,7 +33,6 @@ func Test_readDataCount(t *testing.T) {
 }
 func Test_DistinctValidation(t *testing.T) {
 	trie, _, _ := loadRealData()
-	trie.ComputeTops()
 	type args struct {
 		t Trie
 		c []int
@@ -74,7 +74,6 @@ func Test_DistinctValidation(t *testing.T) {
 
 func Test_TopNAtDate(t *testing.T) {
 	trie, _, _ := loadRealData()
-	trie.ComputeTops()
 	type args struct {
 		t Trie
 		c []int
