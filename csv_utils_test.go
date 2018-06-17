@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -53,7 +55,24 @@ func Test_parseRecord(t *testing.T) {
 		})
 	}
 }
-
+func Test_Open(t *testing.T) {
+	_, srcFilename, _, _ := runtime.Caller(0)
+	filename := filepath.Dir(srcFilename) + ""
+	fmt.Println(filename)
+	f, err := os.Open(filename)
+	if err != nil {
+		fmt.Println("fail", err)
+	} else {
+		fmt.Println("success")
+	}
+	bytes := make([]byte, 100)
+	_, err = f.Read(bytes)
+	if err != nil {
+		fmt.Println("fail read", err)
+	} else {
+		fmt.Println("read success")
+	}
+}
 func Test_readData(t *testing.T) {
 	type args struct {
 		path string
@@ -68,12 +87,14 @@ func Test_readData(t *testing.T) {
 	}{
 		{
 			"parses a simple file and reports errors",
-			args{filepath.Dir(filename) + ""},
+			args{filepath.Dir(filename) + "/test_small.tsv"},
 			[]record{
-				{1438387343000000000, strP("http%3A%2F%2Ffacebook.com")},
-				{1438387283000000000, strP("http%3A%2F%2Fgoogle.com")},
+				{1438387420000000000, strP("go.co")},
+				{1438387421000000000, strP("google.com")},
+				{1438387422000000000, strP("facebook.com")},
+				{1438387423000000000, strP("google.com")},
 			},
-			4,
+			2,
 			6,
 		},
 	}

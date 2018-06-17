@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -17,6 +18,12 @@ type record struct {
 	urlP *string
 }
 
+func (r record) String() string {
+	date := time.Unix(0, r.time)
+	dateStr := date.UTC().Format(dateFormat)
+	return fmt.Sprintf("{%d, %s, %s}", r.time, dateStr, *r.urlP)
+}
+
 type ByTime []record
 
 func (a ByTime) Len() int           { return len(a) }
@@ -29,6 +36,7 @@ func readData(path string) (r []record, errorCount int, lineCount int) {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 	defer f.Close()
 	r, errorCount, lineCount = parseCSVFile(f)
@@ -58,13 +66,19 @@ func parseCSVFile(f io.Reader) (records []record, errorCount int, lineCount int)
 	errorCount = 0
 	r := csv.NewReader(f)
 	r.Comma = '\t'
+	r.FieldsPerRecord = 2
 	lineCount = 0
 	for {
 		line, err := r.Read()
-		if err == io.EOF {
-			break
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			if _, ok := err.(*csv.ParseError); !ok {
+				panic(err)
+			}
+
 		}
-		//FIXME: find an example which fails without EOF !!!
 		lineCount++
 		if err != nil {
 			errorCount++
@@ -80,5 +94,4 @@ func parseCSVFile(f io.Reader) (records []record, errorCount int, lineCount int)
 			}
 		}
 	}
-	return
 }
