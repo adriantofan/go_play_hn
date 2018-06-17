@@ -27,32 +27,10 @@ var config = struct {
 	ComputeDistinctQueryCount, // production configuration
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("content-type", "application/json")
-	if config.logCount == 0 {
-		w.Header().Add("Refresh", "1")
-	}
-	statusMessage, _ := json.Marshal(struct {
-		LineCount  int `json:"line_count"`
-		ErrorCount int `json:"error_count"`
-	}{config.logCount, config.errorCount})
-	w.Write(statusMessage)
-}
-
-// ComputeDistinctQueryCount computes distinct query counts for urls such as /1/queries/count/2015-08-03
-func ComputeDistinctQueryCount(trie Trie, path string) int {
-	var urlCount int
-	dateString := strings.TrimPrefix(path, queryCountURL)
-	dateComponents := LogDateComponentsFromString(dateString)
-	if len(dateComponents) > 0 {
-		urlCount = Distinct(trie, dateComponents)
-	}
-	return urlCount
-}
-
+// Returns a formated JSON answeing the query. Uses config.distinctQueryCountHandler to do the hard lifting
 func distinctQueryCountHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
-	urlCount := ComputeDistinctQueryCount(config.trie, r.URL.Path)
+	urlCount := config.computeDistinctQueryCount(config.trie, r.URL.Path)
 	result, _ := json.Marshal(struct {
 		Count int `json:"count"`
 	}{urlCount})
@@ -67,6 +45,7 @@ func main() {
 		config.trie.ComputeSortedURLs()
 		log.Println("Data loaded in ", time.Now().Sub(startTime).Seconds(), " secconds")
 	}()
+
 	http.HandleFunc(queryCountURL, func(w http.ResponseWriter, r *http.Request) {
 		distinctQueryCountHandler(w, r)
 	})
@@ -75,4 +54,27 @@ func main() {
 		statusHandler(w, r)
 	})
 	config.logFatal(http.ListenAndServe(":8080", nil))
+}
+
+// ComputeDistinctQueryCount computes distinct query counts for urls such as /1/queries/count/2015-08-03
+func ComputeDistinctQueryCount(trie Trie, path string) int {
+	var urlCount int
+	dateString := strings.TrimPrefix(path, queryCountURL)
+	dateComponents := LogDateComponentsFromString(dateString)
+	if len(dateComponents) > 0 {
+		urlCount = Distinct(trie, dateComponents)
+	}
+	return urlCount
+}
+
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
+	if config.logCount == 0 {
+		w.Header().Add("Refresh", "1")
+	}
+	statusMessage, _ := json.Marshal(struct {
+		LineCount  int `json:"line_count"`
+		ErrorCount int `json:"error_count"`
+	}{config.logCount, config.errorCount})
+	w.Write(statusMessage)
 }
