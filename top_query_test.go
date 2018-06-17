@@ -13,6 +13,10 @@ func (a ByCount) Len() int           { return len(a) }
 func (a ByCount) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByCount) Less(i, j int) bool { return a[i].count < a[j].count }
 
+
+// Benchmark_agregate1-8   	       1	3343215523 ns/op	2960291976 B/op	 4240462 allocs/op
+// Benchmark_agregate1-8   	       1	3468621445 ns/op	2960253496 B/op	 4240277 allocs/op
+
 func Benchmark_agregate1(b *testing.B) {
 
 	database, _, _ := readData("hn_logs.tsv")
