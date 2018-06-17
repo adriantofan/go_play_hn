@@ -108,8 +108,13 @@ func Test_TopNAtDate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := TopNAtDate(tt.args.t, tt.args.c, tt.args.n); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Distinct() = %v, want %v", got, tt.want)
+			got := TopNAtDate(tt.args.t, tt.args.c, tt.args.n)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TopNAtDate() = %v, want %v", got, tt.want)
+			}
+			gotCount := len(got)
+			if gotCount != tt.args.n {
+				t.Errorf("TopNAtDate count = %v, want %v", gotCount, tt.args.n)
 			}
 		})
 	}
