@@ -18,7 +18,7 @@ func getDistinctQueries(database []record, urlPrefix string, requestPath string)
 	for i := 0; i < len(database); i++ {
 		t := database[i].time
 		if !ok || (t >= startTs && t < endTs) {
-			key := *database[i].urlP
+			key := database[i].url
 			counter, found := m[key]
 			if found {
 				m[key] = counter + 1

@@ -17,6 +17,12 @@ func strP(s string) *string {
 // BenchmarkReadData-8   	       1	1119643516 ns/op	358123712 B/op	 4870363 allocs/op 1.145
 // BenchmarkReadData-8   	       1	1167624803 ns/op	358123648 B/op	 4870362 allocs/op 1.196
 // BenchmarkReadData-8   	       1	1195088345 ns/op	358125696 B/op	 4870366 allocs/op 1.222
+
+// BenchmarkReadData-8   	       1	1121361311 ns/op	462216960 B/op	 4870364 allocs/op 1.145s
+// BenchmarkReadData-8   	       1	1174937320 ns/op	462216768 B/op	 4870361 allocs/op 1.200
+// BenchmarkReadData-8   	       1	1181765164 ns/op	462218816 B/op	 4870365 allocs/op 1.209
+// BenchmarkReadData-8   	       1	1208232719 ns/op	462218880 B/op	 4870366 allocs/op 1.235
+
 func BenchmarkReadData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		database, errorCount, lineCount := readData("hn_logs.tsv")
@@ -49,7 +55,7 @@ func Test_parseRecord(t *testing.T) {
 		{
 			"decodes a line",
 			args{[]string{"2006-01-02 15:04:05", "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"}},
-			&record{1136214245000000000, strP("http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue")},
+			&record{1136214245000000000, "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"},
 			false,
 		},
 	}
@@ -100,10 +106,10 @@ func Test_readData(t *testing.T) {
 			"parses a simple file and reports errors",
 			args{filepath.Dir(filename) + "/test_small.tsv"},
 			[]record{
-				{1438387420000000000, strP("go.co")},
-				{1438387421000000000, strP("google.com")},
-				{1438387422000000000, strP("facebook.com")},
-				{1438387423000000000, strP("google.com")},
+				{1438387420000000000, "go.co"},
+				{1438387421000000000, "google.com"},
+				{1438387422000000000, "facebook.com"},
+				{1438387423000000000, "google.com"},
 			},
 			2,
 			6,
