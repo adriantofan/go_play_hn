@@ -226,6 +226,11 @@ func Test_timeRange(t *testing.T) {
 // 573697       3	 412219861 ns/op	61946690 B/op	   19230 allocs/op  5.831
 // 573697       3	 444749906 ns/op	61934834 B/op	   19173 allocs/op
 
+// macbook pro
+// 573697       3	 435760932 ns/op	61948077 B/op	   19236 allocs/op
+// 573697       3	 456520327 ns/op	61919720 B/op	   19100 allocs/op
+// 573697       3	 454580880 ns/op	61916392 B/op	   19084 allocs/op
+
 func BenchmarkGetDistinctQueries(b *testing.B) {
 	database, _, _ := readData("hn_logs.tsv")
 	var count int

@@ -23,6 +23,12 @@ func strP(s string) *string {
 // BenchmarkReadData-8   	       1	1181765164 ns/op	462218816 B/op	 4870365 allocs/op 1.209
 // BenchmarkReadData-8   	       1	1208232719 ns/op	462218880 B/op	 4870366 allocs/op 1.235
 
+// macbookpro
+// BenchmarkReadData-8   	       1	1351746437 ns/op	462216832 B/op	 4870362 allocs/op
+// BenchmarkReadData-8   	       1	1335289881 ns/op	462216640 B/op	 4870359 allocs/op
+// BenchmarkReadData-8   	       1	1267709804 ns/op	462216640 B/op	 4870359 allocs/op
+// BenchmarkReadData-8   	       1	1339727746 ns/op	462216832 B/op	 4870362 allocs/op
+
 func BenchmarkReadData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		database, errorCount, lineCount := readData("hn_logs.tsv")

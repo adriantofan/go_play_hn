@@ -58,14 +58,14 @@ func queryCountHandler(w http.ResponseWriter, r *http.Request, database []record
 //     }
 
 func topNHandler(w http.ResponseWriter, r *http.Request, database []record, urlPrefix string) {
-	w.Header().Add("content-type", "application/json")
-	urlCount := getDistinctQueries(database, urlPrefix, r.URL.Path)
-	result, _ := json.Marshal(struct {
-		Queries []struct{ Query string }
-	}{
-		{{""}},
-	})
-	w.Write(result)
+	// w.Header().Add("content-type", "application/json")
+	// urlCount := getDistinctQueries(database, urlPrefix, r.URL.Path)
+	// result, _ := json.Marshal(struct {
+	// 	Queries []struct{ Query string }
+	// }{
+	// 	{{""}},
+	// })
+	// w.Write(result)
 }
 
 func main() {
