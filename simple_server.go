@@ -12,8 +12,8 @@ var database []record
 func statusHandler(w http.ResponseWriter, r *http.Request, lineCount int, errorCount int) {
 	w.Header().Add("content-type", "application/json")
 	statusMessage, _ := json.Marshal(struct {
-		LineCount  int
-		ErrorCount int
+		LineCount  int `json:"line_count"`
+		ErrorCount int `json:"error_count"`
 	}{lineCount, errorCount})
 	fmt.Fprintf(w, string(statusMessage))
 }
