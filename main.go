@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
 
 const queryCountURL string = "/1/queries/count/"
-const topNURL string = "/1/queries/count/"
+const topNURL string = "/1/queries/popular/"
 
 var config = struct {
 	DateFormat                string
@@ -37,6 +39,17 @@ func distinctQueryCountHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(result)
 }
 
+func topNHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
+	results := ComputeTopNQueries(config.trie, r.URL.Path, r.URL.Query())
+	result, _ := json.Marshal(struct {
+		Queries []urlCountPair
+	}{
+		results,
+	})
+	w.Write(result)
+}
+
 func main() {
 	go func() {
 		startTime := time.Now()
@@ -50,10 +63,31 @@ func main() {
 		distinctQueryCountHandler(w, r)
 	})
 
+	http.HandleFunc(topNURL, func(w http.ResponseWriter, r *http.Request) {
+		topNHandler(w, r)
+	})
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		statusHandler(w, r)
 	})
 	config.logFatal(http.ListenAndServe(":8080", nil))
+}
+
+// ComputeTopNQueries computes distinct query counts for urls such as /1/queries/count/2015-08-03
+func ComputeTopNQueries(trie Trie, path string, params url.Values) []urlCountPair {
+	dateString := strings.TrimPrefix(path, topNURL)
+	dateComponents := LogDateComponentsFromString(dateString)
+	if len(dateComponents) == 0 {
+		return make([]urlCountPair, 0)
+	}
+	var count int = 5
+	countStrs, foundCount := params["size"]
+	if foundCount && len(countStrs) > 0 {
+		if parsedCount, parsed := strconv.ParseInt(countStrs[0], 10, 64); parsed != nil {
+			count = int(parsedCount)
+		}
+	}
+	return TopNAtDate(trie, dateComponents, count)
 }
 
 // ComputeDistinctQueryCount computes distinct query counts for urls such as /1/queries/count/2015-08-03
