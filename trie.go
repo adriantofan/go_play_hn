@@ -13,7 +13,9 @@ type TrieNode struct {
 	sortedUrls *[]QueryCountPair
 }
 
-// QueryCountPair used internally and in kind's hackish way to display the JSON
+// QueryCountPair used internally and in kind's hackish way to display the JSON. It might be that it exposes to the
+// client to much of the internal trie implementation. I would tie the JSON format the web service and not on the
+// internal data structure.
 type QueryCountPair struct {
 	Query string `json:"query"`
 	Count int    `json:"count"`
@@ -40,7 +42,6 @@ func (pTrieNode *TrieNode) getOrMake(component int) (child *TrieNode) {
 	if found {
 		return
 	}
-	//BUG(atn) remove reference to MakeTrie which creates a specific trie with urlCount backed by a hash map
 	child = MakeTrieNode()
 	pTrieNode.childs[component] = child
 	return

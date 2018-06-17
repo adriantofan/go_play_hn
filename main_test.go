@@ -93,5 +93,5 @@ func Test_topNHandler(t *testing.T) {
 }
 
 func TestComputeTopNQueries(t *testing.T) {
-	t.Errorf("todo")
+	t.Errorf("implement same as TestComputeDistinctQueryCount")
 }

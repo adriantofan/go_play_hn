@@ -44,7 +44,9 @@ func (t Trie) ComputeSortedURLs() {
 		sort.Slice(sorted, func(i, j int) bool {
 			return sorted[i].Count > sorted[j].Count
 		})
+		// keep sorted (url, count) pairs at each level
 		n.sortedUrls = &sorted
+		// free the memory give that hash maps no longer needed from this point on
 		n.logCounts = nil
 	})
 }
