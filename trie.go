@@ -70,6 +70,9 @@ func (pTrieNode *TrieNode) Get(c []int) *TrieNode {
 
 // Visit calls handler eagerly for all reachable nodes starting with self
 func (pTrieNode *TrieNode) Visit(handler func(*TrieNode)) {
+	if pTrieNode == nil {
+		return
+	}
 	handler(pTrieNode)
 	for _, pChild := range pTrieNode.childs {
 		pChild.Visit(handler)
