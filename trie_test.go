@@ -28,10 +28,10 @@ func TestMakeTrieNode(t *testing.T) {
 		t.Errorf("MakeTrieNode() should initialize logCounts")
 	}
 	if ptn.childs == nil {
-		t.Errorf("MakeTrieNode() should initialize childs")
+		t.Errorf("MakeTrieNode() should initialize child map")
 	}
 	if ptn.sortedUrls != nil {
-		t.Errorf("MakeTrieNode() should not initialize childs")
+		t.Errorf("MakeTrieNode() should not initialize child map")
 	}
 }
 
@@ -52,14 +52,14 @@ func TestTrieNode_getOrMake(t *testing.T) {
 	}
 	gotNode, foundNode := trie.rootNode.childs[0]
 	if !foundNode || !reflect.DeepEqual(gotNode, pTrieNode) {
-		t.Errorf("getOrMake() should properly insert a new node in to childs")
+		t.Errorf("getOrMake() should properly insert a new node in to child array")
 	}
 	if len(trie.rootNode.childs) != 1 || trie.rootNode.getOrMake(0) != pTrieNode {
 		t.Errorf("getOrMake() should not reinsert a node on the same position")
 	}
 	var empty *TrieNode
 	if empty.getOrMake(1) != nil {
-		t.Errorf("getOrMake() should not create nodes on empty recievers")
+		t.Errorf("getOrMake() should not create nodes on empty receivers")
 	}
 }
 
@@ -88,7 +88,7 @@ func TestTrieNode_Get(t *testing.T) {
 			args{[]int{}},
 			empty1,
 		},
-		{"nil when childs exists and it doesen't contain it",
+		{"nil when child exists and it doesn't contain it",
 			&TrieNode{
 				make(map[string]int),
 				map[int]*TrieNode{1: MakeTrieNode()},
@@ -97,7 +97,7 @@ func TestTrieNode_Get(t *testing.T) {
 			args{[]int{2}},
 			nil,
 		},
-		{"finds it when childs exists and it contains it",
+		{"finds it when child exists and it contains it",
 			&TrieNode{
 				make(map[string]int),
 				map[int]*TrieNode{1: empty1},
@@ -106,7 +106,7 @@ func TestTrieNode_Get(t *testing.T) {
 			args{[]int{1}},
 			empty1,
 		},
-		{"finds it when childs exists and it contains it deeper",
+		{"finds it when child exists and it contains it deeper",
 			&TrieNode{
 				make(map[string]int),
 				map[int]*TrieNode{2: notEmpty},

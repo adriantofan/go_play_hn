@@ -45,7 +45,7 @@ func TestParseTime(t *testing.T) {
 			time.Date(2000, time.January, 2, 11, 12, 13, 0, time.UTC),
 		},
 		{
-			"unparsable",
+			"un-parsable",
 			args{"-01-02 11:12:13"},
 			time.Time{},
 		},
@@ -74,7 +74,7 @@ func Test_LogDateComponentsFromString(t *testing.T) {
 			[]int{},
 		},
 		{
-			"secconds",
+			"seconds",
 			args{"2006-01-02 15:04:05"},
 			[]int{2006, 01, 02, 15, 4, 5},
 		},

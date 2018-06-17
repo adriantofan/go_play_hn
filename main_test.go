@@ -14,7 +14,7 @@ func Test_distinctQueryCountHandler(t *testing.T) {
 			t.Errorf("distinctQueryCountHandler should get global trie %v got %v", config.trie, trie)
 		}
 		if path != requestPath {
-			t.Errorf("distinctQueryCountHandler should get requst path %v got %v", requestPath, path)
+			t.Errorf("distinctQueryCountHandler should get request path %v got %v", requestPath, path)
 		}
 		return 10
 	}
@@ -62,7 +62,7 @@ func TestComputeDistinctQueryCount(t *testing.T) {
 			2,
 		},
 		{
-			"returns 0 when the date is unparsable",
+			"returns 0 when the date is un-parsable",
 			args{
 				trie,
 				"/1/queries/count/garbage",

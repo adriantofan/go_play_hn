@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// AddLogGeneric_Slow navigates the trie down and adds the url to each date component
-func (n *TrieNode) AddLogGeneric_Slower(components []int, url string) {
+// AddLogGenericSlower navigates the trie down and adds the url to each date component
+func (n *TrieNode) AddLogGenericSlower(components []int, url string) {
 	n.logCounts.increase(url)
 	// add the url to subsequent levels
 	if len(components) != 1 {
@@ -15,7 +15,6 @@ func (n *TrieNode) AddLogGeneric_Slower(components []int, url string) {
 }
 
 // AddLog navigates the trie down and adds the url to each date component
-
 func (n *TrieNode) AddLog(components []int, url string) {
 	// do not add at top level url
 	if len(components) != 6 {
@@ -27,7 +26,7 @@ func (n *TrieNode) AddLog(components []int, url string) {
 	}
 }
 
-// AddLog parses time in to a date component array and uses and uses root node add to pass the url allong the trie
+// AddLog parses time in to a date component array and uses and uses root node add to pass the url along the trie
 func (t Trie) AddLog(date time.Time, url string) {
 	components := LogDateComponents(date)
 	t.rootNode.AddLog(components[:], url)
@@ -51,7 +50,7 @@ func (t Trie) ComputeSortedURLs() {
 }
 
 // TopNAtDate returns top n urls at the given date where c contains the most significants components of that date
-// [Year, Month, Day, Hour, Minute, Seccond]. For example in 2012 c is [2012]; in 2012-12 c is [2012, 12]
+// [Year, Month, Day, Hour, Minute, Second]. For example in 2012 c is [2012]; in 2012-12 c is [2012, 12]
 func TopNAtDate(t Trie, c []int, n int) []QueryCountPair {
 	node := t.Get(c)
 	if node != nil && node.sortedUrls != nil && len(*node.sortedUrls) > 0 {
@@ -65,7 +64,7 @@ func TopNAtDate(t Trie, c []int, n int) []QueryCountPair {
 }
 
 // Distinct returns the how many distinct urls are at the given date, where c contains the most significants components of the date
-// [Year, Month, Day, Hour, Minute, Seccond]. For example in 2012 c is [2012]; in 2012-12 c is [2012, 12]
+// [Year, Month, Day, Hour, Minute, Second]. For example in 2012 c is [2012]; in 2012-12 c is [2012, 12]
 func Distinct(t Trie, c []int) int {
 	node := t.Get(c)
 	if node != nil && node.sortedUrls != nil {

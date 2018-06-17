@@ -72,7 +72,7 @@ func Test_parseRecord(t *testing.T) {
 			true,
 		},
 		{
-			"ignores unparsable date",
+			"ignores un-parsable date",
 			args{[]string{"2015--01 00:01:16", "url"}},
 			time.Time{},
 			"",

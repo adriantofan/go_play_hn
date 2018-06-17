@@ -1,19 +1,19 @@
 package main
 
-// Trie datastructure for log processing
+// Trie data structure for log processing
 type Trie struct {
 	rootNode *TrieNode
 }
 
 // TrieNode implementation for storing log lines organized by time
-// could log count be generic ? so we might keep a seccond trie with the sorted logs and dropping the one having the counts
+// could log count be generic ? so we might keep a second trie with the sorted logs and dropping the one having the counts
 type TrieNode struct {
 	logCounts  stringIntMap
 	childs     map[int]*TrieNode
 	sortedUrls *[]QueryCountPair
 }
 
-// QueryCountPair used internaly and in kind'of hackish way to display the json
+// QueryCountPair used internally and in kind's hackish way to display the JSON
 type QueryCountPair struct {
 	Query string `json:"query"`
 	Count int    `json:"count"`
@@ -40,7 +40,7 @@ func (pTrieNode *TrieNode) getOrMake(component int) (child *TrieNode) {
 	if found {
 		return
 	}
-	//BUG(atn) remove reference to MakeTrie wich creates a specific trie with urlCount backed by a hash map
+	//BUG(atn) remove reference to MakeTrie which creates a specific trie with urlCount backed by a hash map
 	child = MakeTrieNode()
 	pTrieNode.childs[component] = child
 	return
@@ -95,7 +95,7 @@ func (t Trie) Visit(handler func(*TrieNode)) {
 
 }
 
-// a wrapper arrounf a map
+// a wrapper around a map
 type stringIntMap map[string]int
 
 // a simple interface to keep counts a set of strings

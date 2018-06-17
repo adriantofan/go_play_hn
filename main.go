@@ -28,10 +28,10 @@ var config = struct {
 	0,                     // data from file
 	0,                     // data from file
 	ComputeDistinctQueryCount, // production configuration
-	ComputeTopNQueries,
+	ComputeTopNQueries,        // production configuration
 }
 
-// Returns a formated JSON answeing the query. Uses config.distinctQueryCountHandler to do the hard lifting
+// Returns a formatted JSON answering the distinct query. Uses config.distinctQueryCountHandler to do the hard lifting
 func distinctQueryCountHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	urlCount := config.computeDistinctQueryCount(config.trie, r.URL.Path)
@@ -41,6 +41,7 @@ func distinctQueryCountHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(result)
 }
 
+// Returns a formatted JSON answering the top n query. Uses config.computeTopNQueries to do the hard lifting
 func topNHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	results := config.computeTopNQueries(config.trie, r.URL.Path, r.URL.Query())
@@ -52,13 +53,14 @@ func topNHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(result)
 }
 
+// Registers the handlers and starts the server. Loads and processes data asynchronously
 func main() {
 	go func() {
 		startTime := time.Now()
 		log.Println("Loading data")
 		config.trie, config.logCount, config.errorCount = readData("hn_logs.tsv")
 		config.trie.ComputeSortedURLs()
-		log.Println("Data loaded in ", time.Now().Sub(startTime).Seconds(), " secconds")
+		log.Println("Data loaded in ", time.Now().Sub(startTime).Seconds(), " seconds")
 	}()
 
 	http.HandleFunc(queryCountURL, func(w http.ResponseWriter, r *http.Request) {

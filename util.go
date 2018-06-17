@@ -2,7 +2,7 @@ package main
 
 import "time"
 
-// LogDateComponents returns [Year, Month, Day, Hour, Minute, Seccond] extracted from the date
+// LogDateComponents returns [Year, Month, Day, Hour, Minute, Second] extracted from the date
 func LogDateComponents(date time.Time) [6]int {
 	r := [...]int{
 		date.Year(),
