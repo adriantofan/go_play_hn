@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -16,13 +17,24 @@ type record struct {
 	urlP *string
 }
 
-// open the file and use a scanner to read line by line
-func readData() {
-	f, err := os.Open("/Users/adriantofan/devel/a_test/hn_logs_short.tsv")
+type ByTime []record
+
+func (a ByTime) Len() int           { return len(a) }
+func (a ByTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByTime) Less(i, j int) bool { return a[i].time < a[j].time }
+
+// reads, filters and sorts data
+func readData(path string) (r []record, errorCount int, lineCount int) {
+	r = nil
+	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
+	r, errorCount, lineCount = parseCSVFile(f)
+	sort.Sort(ByTime(r))
+	log.Printf("Loaded and sorted %d lines with %d errors from file %s\n", lineCount, errorCount, path)
+	return
 }
 
 func parseRecord(line []string) (r *record, err error) {
@@ -52,6 +64,7 @@ func parseCSVFile(f io.Reader) (records []record, errorCount int, lineCount int)
 		if err == io.EOF {
 			break
 		}
+		//FIXME: find an example which fails without EOF !!!
 		lineCount++
 		if err != nil {
 			errorCount++

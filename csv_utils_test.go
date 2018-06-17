@@ -1,24 +1,20 @@
 package main
 
 import (
-	"io"
+	"path/filepath"
 	"reflect"
-	"strings"
+	"runtime"
 	"testing"
 )
 
-const sampleFileContent string = `
-2015-08-01 00:01:23	http%3A%2F%2Fgoogle.com
-2015-08-01 00:02:23	http%3A%2F%2Ffacebook.com
-2015-08-01 00:02:23
-something
-`
+func strP(s string) *string {
+	return &s
+}
 
 func Test_parseRecord(t *testing.T) {
 	type args struct {
 		line []string
 	}
-	url1 := "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"
 	tests := []struct {
 		name    string
 		args    args
@@ -40,7 +36,7 @@ func Test_parseRecord(t *testing.T) {
 		{
 			"decodes a line",
 			args{[]string{"2006-01-02 15:04:05", "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"}},
-			&record{1136214245000000000, &url1},
+			&record{1136214245000000000, strP("http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue")},
 			false,
 		},
 	}
@@ -58,41 +54,40 @@ func Test_parseRecord(t *testing.T) {
 	}
 }
 
-func Test_parseCSVFile(t *testing.T) {
-	url1 := "http%3A%2F%2Fgoogle.com"
-	url2 := "http%3A%2F%2Ffacebook.com"
+func Test_readData(t *testing.T) {
 	type args struct {
-		f io.Reader
+		path string
 	}
+	_, filename, _, _ := runtime.Caller(0)
 	tests := []struct {
 		name           string
 		args           args
-		wantRecords    []record
+		wantR          []record
 		wantErrorCount int
 		wantLineCount  int
 	}{
 		{
 			"parses a simple file and reports errors",
-			args{strings.NewReader(sampleFileContent)},
+			args{filepath.Dir(filename) + ""},
 			[]record{
-				{1438387283000000000, &url1},
-				{1438387343000000000, &url2},
+				{1438387343000000000, strP("http%3A%2F%2Ffacebook.com")},
+				{1438387283000000000, strP("http%3A%2F%2Fgoogle.com")},
 			},
-			2,
 			4,
+			6,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotRecords, gotErrorCount, gotLineCount := parseCSVFile(tt.args.f)
-			if !reflect.DeepEqual(gotRecords, tt.wantRecords) {
-				t.Errorf("parseCSVFile() gotRecords = %v, want %v", gotRecords, tt.wantRecords)
+			gotR, gotErrorCount, gotLineCount := readData(tt.args.path)
+			if !reflect.DeepEqual(gotR, tt.wantR) {
+				t.Errorf("readData() gotR = %v, want %v", gotR, tt.wantR)
 			}
 			if gotErrorCount != tt.wantErrorCount {
-				t.Errorf("parseCSVFile() gotErrorCount = %v, want %v", gotErrorCount, tt.wantErrorCount)
+				t.Errorf("readData() gotErrorCount = %v, want %v", gotErrorCount, tt.wantErrorCount)
 			}
 			if gotLineCount != tt.wantLineCount {
-				t.Errorf("parseCSVFile() gotLineCount = %v, want %v", gotLineCount, tt.wantLineCount)
+				t.Errorf("readData() gotLineCount = %v, want %v", gotLineCount, tt.wantLineCount)
 			}
 		})
 	}
