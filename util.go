@@ -21,31 +21,37 @@ func ParseTime(s string) time.Time {
 	return t.UTC()
 }
 
-// TimeRange given a formated datestring it tries to parse it and then returns an interval arround it
-func TimeRange(dateString string) (start time.Time, end time.Time, ok bool) {
+// LogDateComponentsFromString parses a date string to it's components
+func LogDateComponentsFromString(dateString string) []int {
 	t, err := time.Parse("2006-01-02 15:04:05", dateString)
 	if err == nil {
-		return t, t.Add(time.Second), true
+		cs := LogDateComponents(t)
+		return cs[:]
 	}
 	t, err = time.Parse("2006-01-02 15:04", dateString)
 	if err == nil {
-		return t, t.Add(time.Minute), true
+		cs := LogDateComponents(t)
+		return cs[:5]
 	}
 	t, err = time.Parse("2006-01-02 15", dateString)
 	if err == nil {
-		return t, t.Add(time.Hour), true
+		cs := LogDateComponents(t)
+		return cs[:4]
 	}
 	t, err = time.Parse("2006-01-02", dateString)
 	if err == nil {
-		return t, t.AddDate(0, 0, 1), true
+		cs := LogDateComponents(t)
+		return cs[:3]
 	}
 	t, err = time.Parse("2006-01", dateString)
 	if err == nil {
-		return t, t.AddDate(0, 1, 0), true
+		cs := LogDateComponents(t)
+		return cs[:2]
 	}
 	t, err = time.Parse("2006", dateString)
 	if err == nil {
-		return t, t.AddDate(1, 0, 0), true
+		cs := LogDateComponents(t)
+		return cs[:1]
 	}
-	return time.Time{}, time.Time{}, false
+	return []int{}
 }

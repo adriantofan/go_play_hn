@@ -59,78 +59,56 @@ func TestParseTime(t *testing.T) {
 	}
 }
 
-func Test_TimeRange(t *testing.T) {
+func Test_LogDateComponentsFromString(t *testing.T) {
 	type args struct {
 		dateString string
 	}
 	tests := []struct {
-		name      string
-		args      args
-		wantStart time.Time
-		wantEnd   time.Time
-		wantOk    bool
+		name           string
+		args           args
+		wantComponents []int
 	}{
 		{
 			"empty",
 			args{""},
-			time.Time{},
-			time.Time{},
-			false,
+			[]int{},
 		},
 		{
 			"secconds",
 			args{"2006-01-02 15:04:05"},
-			time.Date(2006, 01, 02, 15, 4, 5, 0, time.UTC),
-			time.Date(2006, 01, 02, 15, 4, 6, 0, time.UTC),
-			true,
+			[]int{2006, 01, 02, 15, 4, 5},
 		},
 		{
 			"minutes",
 			args{"2006-01-02 15:04"},
-			time.Date(2006, 01, 02, 15, 4, 0, 0, time.UTC),
-			time.Date(2006, 01, 02, 15, 5, 0, 0, time.UTC),
-			true,
+			[]int{2006, 01, 02, 15, 4},
 		},
 		{
 			"hours",
 			args{"2006-01-02 15"},
-			time.Date(2006, 01, 02, 15, 0, 0, 0, time.UTC),
-			time.Date(2006, 01, 02, 16, 0, 0, 0, time.UTC),
-			true,
+			[]int{2006, 01, 02, 15},
 		},
 		{
 			"days",
 			args{"2006-01-02"},
-			time.Date(2006, 01, 02, 0, 0, 0, 0, time.UTC),
-			time.Date(2006, 01, 03, 0, 0, 0, 0, time.UTC),
-			true,
+			[]int{2006, 01, 02},
 		},
 		{
 			"months",
 			args{"2006-01"},
-			time.Date(2006, 1, 1, 0, 0, 0, 0, time.UTC),
-			time.Date(2006, 2, 1, 0, 0, 0, 0, time.UTC),
-			true,
+			[]int{2006, 1},
 		},
 		{
 			"years",
 			args{"2006"},
-			time.Date(2006, 1, 1, 0, 0, 0, 0, time.UTC),
-			time.Date(2007, 1, 1, 0, 0, 0, 0, time.UTC),
-			true,
+			[]int{2006},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotStart, gotEnd, gotOk := TimeRange(tt.args.dateString)
-			if !reflect.DeepEqual(gotStart, tt.wantStart) {
-				t.Errorf("TimeRange() gotStart = %v, want %v", gotStart, tt.wantStart)
-			}
-			if !reflect.DeepEqual(gotEnd, tt.wantEnd) {
-				t.Errorf("TimeRange() gotEnd = %v, want %v", gotEnd, tt.wantEnd)
-			}
-			if gotOk != tt.wantOk {
-				t.Errorf("TimeRange() gotOk = %v, want %v", gotOk, tt.wantOk)
+			gotComponents := LogDateComponentsFromString(tt.args.dateString)
+			if !reflect.DeepEqual(gotComponents, tt.wantComponents) {
+				t.Errorf("TimeRange() LogDateComponentsFromString = %v, want %v", gotComponents, tt.wantComponents)
 			}
 		})
 	}

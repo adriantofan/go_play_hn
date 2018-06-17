@@ -1,20 +1,78 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
+	"net/http"
+	"strings"
+	"time"
 )
 
+const queryCountURL string = "/1/queries/count/"
+const topNURL string = "/1/queries/count/"
+
 var config = struct {
-	DateFormat string
-	logFatal   func(v ...interface{})
+	DateFormat                string
+	logFatal                  func(v ...interface{})
+	trie                      Trie
+	logCount                  int
+	errorCount                int
+	computeDistinctQueryCount func(Trie, string) int
 }{
-	"2006-01-02 15:04:05",
-	log.Fatal,
+	"2006-01-02 15:04:05", // configuration
+	log.Fatal,             // production configuration
+	MakeTrie(),            // data from file
+	0,                     // data from file
+	0,                     // data from file
+	ComputeDistinctQueryCount, // production configuration
+}
+
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
+	if config.logCount == 0 {
+		w.Header().Add("Refresh", "1")
+	}
+	statusMessage, _ := json.Marshal(struct {
+		LineCount  int `json:"line_count"`
+		ErrorCount int `json:"error_count"`
+	}{config.logCount, config.errorCount})
+	w.Write(statusMessage)
+}
+
+// ComputeDistinctQueryCount computes distinct query counts for urls such as /1/queries/count/2015-08-03
+func ComputeDistinctQueryCount(trie Trie, path string) int {
+	var urlCount int
+	dateString := strings.TrimPrefix(path, queryCountURL)
+	dateComponents := LogDateComponentsFromString(dateString)
+	if len(dateComponents) > 0 {
+		urlCount = Distinct(trie, dateComponents)
+	}
+	return urlCount
+}
+
+func distinctQueryCountHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
+	urlCount := ComputeDistinctQueryCount(config.trie, r.URL.Path)
+	result, _ := json.Marshal(struct {
+		Count int `json:"count"`
+	}{urlCount})
+	w.Write(result)
 }
 
 func main() {
-	const queryCountURL string = "/1/queries/count/"
-	const topNURL string = "/1/queries/count/"
-	_, _, _ = readData("hn_logs.tsv")
-	// logFatal(http.ListenAndServe(":8080", nil))
+	go func() {
+		startTime := time.Now()
+		log.Println("Loading data")
+		config.trie, config.logCount, config.errorCount = readData("hn_logs.tsv")
+		config.trie.ComputeSortedURLs()
+		log.Println("Data loaded in ", time.Now().Sub(startTime).Seconds(), " secconds")
+	}()
+	http.HandleFunc(queryCountURL, func(w http.ResponseWriter, r *http.Request) {
+		distinctQueryCountHandler(w, r)
+	})
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		statusHandler(w, r)
+	})
+	config.logFatal(http.ListenAndServe(":8080", nil))
 }

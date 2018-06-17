@@ -55,18 +55,20 @@ func (t Trie) Get(c []int) *TrieNode {
 
 // Get returns the node with the specified prefix in trie t or nil if not found
 func (pTrieNode *TrieNode) Get(c []int) *TrieNode {
-	// base case
-	if len(c) == 0 {
-		return pTrieNode
-	}
-	child, hasChild := pTrieNode.childs[c[0]]
-	if hasChild {
-		// child is a leaf
-		if len(child.childs) == 0 {
-			return child
+	if pTrieNode != nil {
+		// base case
+		if len(c) == 0 {
+			return pTrieNode
 		}
-		// recursive case
-		return child.Get(c[1:])
+		child, hasChild := pTrieNode.childs[c[0]]
+		if hasChild {
+			// child is a leaf
+			if len(child.childs) == 0 {
+				return child
+			}
+			// recursive case
+			return child.Get(c[1:])
+		}
 	}
 	// not found
 	return nil
