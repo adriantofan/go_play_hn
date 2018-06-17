@@ -72,7 +72,7 @@ func Test_parseRecord(t *testing.T) {
 		{
 			"decodes a line",
 			args{[]string{"2006-01-02 15:04:05", "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"}},
-			&record{pt("2006-01-02 15:04:05"), "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"},
+			&record{pt("2006-01-02 15:04:05"), "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue", 1},
 			false,
 		},
 	}
@@ -106,10 +106,10 @@ func Test_readData(t *testing.T) {
 			"parses a simple file and reports errors",
 			args{filepath.Dir(filename) + "/test_small.tsv"},
 			[]record{
-				{pt("2015-08-01 00:03:40"), "go.co"},
-				{pt("2015-08-01 00:03:41"), "google.com"},
-				{pt("2015-08-01 00:03:42"), "facebook.com"},
-				{pt("2015-08-01 00:03:43"), "google.com"},
+				{pt("2015-08-01 00:03:40"), "go.co", 1},
+				{pt("2015-08-01 00:03:41"), "google.com", 1},
+				{pt("2015-08-01 00:03:42"), "facebook.com", 1},
+				{pt("2015-08-01 00:03:43"), "google.com", 1},
 			},
 			2,
 			6,

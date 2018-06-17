@@ -15,13 +15,14 @@ const dateFormat = "2006-01-02 15:04:05"
 
 // BUG(adrian) is time64 good enough !? . urlP can be just url ... because it is a struct with a reference
 type record struct {
-	time time.Time
-	url  string
+	time  time.Time
+	url   string
+	count uint
 }
 
 func (r record) String() string {
 	dateStr := r.time.UTC().Format(dateFormat)
-	return fmt.Sprintf("{%s, %s}", dateStr, r.url)
+	return fmt.Sprintf("{%s, %s, %d}", dateStr, r.url, r.count)
 }
 
 type ByTime []record
@@ -56,7 +57,7 @@ func parseRecord(line []string) (r *record, err error) {
 		r = nil
 		return
 	}
-	r = &record{t, line[1]}
+	r = &record{t, line[1], 1}
 	err = nil
 	return
 }
