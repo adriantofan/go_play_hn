@@ -32,6 +32,7 @@ func TestTrie_ComputeSortedURLs(t *testing.T) {
 	trie := MakeTrie()
 	trie.AddLog(ParseTime("2015-08-01 00:03:43"), "term1")
 	trie.AddLog(ParseTime("2015-08-01 00:03:43"), "term2")
+	trie.AddLog(ParseTime("2015-08-01 00:03:43"), "term1")
 	trie.AddLog(ParseTime("2015-08-02 00:03:43"), "term1")
 	trie.ComputeSortedURLs()
 	trie.Visit(func(pTrieNode *TrieNode) {
@@ -45,27 +46,27 @@ func TestTrie_ComputeSortedURLs(t *testing.T) {
 	}{
 		{
 			[]int{2015},
-			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 3}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8},
-			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 3}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1},
-			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1, 0},
-			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1, 0, 3},
-			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1, 0, 3, 43},
-			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 	}
 	// BUG(adrian) for the same url count the result is not deterministic  [{term1 1} {term2 1}] sortedUrls &[{term2 1} {term1 1}]
@@ -76,7 +77,7 @@ func TestTrie_ComputeSortedURLs(t *testing.T) {
 			return
 		}
 		if !reflect.DeepEqual(&d.wantSortedTerms, gotChild.sortedUrls) {
-			t.Errorf("ComputeSortedURLs for  gotSortedItems %v sortedUrls %v", d.wantSortedTerms, gotChild.sortedUrls)
+			t.Errorf("ComputeSortedURLs for %v sortedUrls %v", d.wantSortedTerms, gotChild.sortedUrls)
 		}
 	}
 
