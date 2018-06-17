@@ -64,30 +64,61 @@ func TestTrieNode_getOrMake(t *testing.T) {
 }
 
 func TestTrieNode_Get(t *testing.T) {
-	type fields struct {
-		logCounts  stringIntMap
-		childs     map[int]*TrieNode
-		sortedUrls *[]urlCountPair
-	}
 	type args struct {
 		c []int
 	}
+	empty1 := &TrieNode{
+		make(map[string]int),
+		make(map[int]*TrieNode),
+		nil,
+	}
+	notEmpty := &TrieNode{
+		make(map[string]int),
+		map[int]*TrieNode{1: empty1},
+		nil,
+	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *TrieNode
+		name      string
+		pTrieNode *TrieNode
+		args      args
+		want      *TrieNode
 	}{
-		// TODO: Add test cases.
+		{"when path is empty return self",
+			empty1,
+			args{[]int{}},
+			empty1,
+		},
+		{"nil when childs exists and it doesen't contain it",
+			&TrieNode{
+				make(map[string]int),
+				map[int]*TrieNode{1: MakeTrieNode()},
+				nil,
+			},
+			args{[]int{2}},
+			nil,
+		},
+		{"finds it when childs exists and it contains it",
+			&TrieNode{
+				make(map[string]int),
+				map[int]*TrieNode{1: empty1},
+				nil,
+			},
+			args{[]int{1}},
+			empty1,
+		},
+		{"finds it when childs exists and it contains it deeper",
+			&TrieNode{
+				make(map[string]int),
+				map[int]*TrieNode{2: notEmpty},
+				nil,
+			},
+			args{[]int{2, 1}},
+			empty1,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pTrieNode := &TrieNode{
-				logCounts:  tt.fields.logCounts,
-				childs:     tt.fields.childs,
-				sortedUrls: tt.fields.sortedUrls,
-			}
-			if got := pTrieNode.Get(tt.args.c); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.pTrieNode.Get(tt.args.c); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("TrieNode.Get() = %v, want %v", got, tt.want)
 			}
 		})
