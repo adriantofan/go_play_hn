@@ -7,6 +7,140 @@ import (
 	"time"
 )
 
+func ts(s string) int64 {
+	t, _ := time.Parse("2006-01-02 15:04:05", s)
+	return t.UnixNano()
+}
+func Test_getDistinct(t *testing.T) {
+	type args struct {
+		database []record
+		startTs  int64
+		endTs    int64
+	}
+	testDb := []record{
+		{ts("2006-01-02 15:04:05"), "urlA"},
+		{ts("2006-01-02 15:04:05"), "urlA"},
+		{ts("2006-01-02 15:04:05"), "urlB"},
+		{ts("2006-01-03 15:04:05"), "urlC"},
+		{ts("2006-01-04 15:04:05"), "urlD"},
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			"no overlap on the left ",
+			args{testDb, ts("2004-01-01 01:01:00"), ts("2005-01-01 01:01:00")},
+			0,
+		},
+		{
+			"start outide and end inside",
+			args{testDb, ts("2004-01-01 01:01:00"), ts("2006-01-02 16:01:00")},
+			2,
+		},
+		{
+			"start inside and end inside",
+			args{testDb, ts("2006-01-02 15:04:05"), ts("2006-01-02 16:01:00")},
+			2,
+		},
+		{
+			"start inside and end outside",
+			args{testDb, ts("2006-01-02 16:01:00"), ts("2007-01-01 01:01:00")},
+			2,
+		},
+		{
+			"no overlap on the right",
+			args{testDb, ts("2007-01-01 01:01:00"), ts("2008-01-01 01:01:00")},
+			0,
+		},
+		{
+			"all",
+			args{testDb, 0, 0xffffffff},
+			4,
+		},
+		{
+			"all - start / end inversed",
+			args{testDb, 0xffffffff, 0},
+			4,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getDistinct(tt.args.database, tt.args.startTs, tt.args.endTs); got != tt.want {
+				t.Errorf("getDistinct() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getDistinctQueries(t *testing.T) {
+	type args struct {
+		database    []record
+		urlPrefix   string
+		requestPath string
+	}
+
+	testDb := []record{
+		{ts("2006-01-02 15:04:05"), "urlA"},
+		{ts("2006-01-02 15:04:05"), "urlA"},
+		{ts("2006-01-02 15:04:05"), "urlB"},
+		{ts("2006-01-03 15:04:05"), "urlC"},
+		{ts("2006-01-04 15:04:05"), "urlD"},
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			"full dataset query count",
+			args{
+				testDb,
+				"",
+				"",
+			},
+			4,
+		},
+		{
+			"at the begining",
+			args{
+				testDb,
+				"",
+				"2006-01-02 15:04:05",
+			},
+			2,
+		},
+		{
+			"in the middle",
+			args{
+				testDb,
+				"",
+				"2006-01-03",
+			},
+			1,
+		},
+		{
+			"over the end",
+			args{
+				testDb,
+				"",
+				"2006-01",
+			},
+			4,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getDistinctQueries(tt.args.database, tt.args.urlPrefix, tt.args.requestPath); got != tt.want {
+				t.Errorf("getDistinctQueries() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_timeRange(t *testing.T) {
 	type args struct {
 		dateString string

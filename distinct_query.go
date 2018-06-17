@@ -1,29 +1,47 @@
 package main
 
 import (
+	"sort"
 	"strings"
 	"time"
 )
 
 func getDistinctQueries(database []record, urlPrefix string, requestPath string) int {
 	dateString := strings.TrimPrefix(requestPath, urlPrefix)
-	m := make(map[string]int)
 	start, end, ok := timeRange(dateString)
 	var startTs, endTs int64 = 0, 0xffffffff
 	if ok {
 		startTs = start.UnixNano()
 		endTs = end.UnixNano()
 	}
+	return getDistinct(database, startTs, endTs)
+}
 
-	for i := 0; i < len(database); i++ {
+func getDistinct(database []record, startTs int64, endTs int64) int {
+	infiniteInverval := false
+	if endTs < startTs {
+		startTs, endTs = endTs, startTs
+	}
+	if startTs == 0 && endTs == 0xffffffff {
+		infiniteInverval = true
+	}
+	m := make(map[string]int)
+	start := sort.Search(len(database), func(i int) bool {
+		return database[i].time >= startTs
+	})
+	for i := start; i < len(database); i++ {
 		t := database[i].time
-		if !ok || (t >= startTs && t < endTs) {
+		if infiniteInverval || (t >= startTs && t < endTs) {
 			key := database[i].url
 			counter, found := m[key]
 			if found {
 				m[key] = counter + 1
 			} else {
 				m[key] = 1
+			}
+		} else {
+			if t >= endTs {
+				break
 			}
 		}
 	}
