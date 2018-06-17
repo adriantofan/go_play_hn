@@ -13,6 +13,17 @@ func strP(s string) *string {
 	return &s
 }
 
+// BenchmarkReadData-8   	       1	1118722055 ns/op	358121792 B/op	 4870361 allocs/op
+// BenchmarkReadData-8   	       1	1119643516 ns/op	358123712 B/op	 4870363 allocs/op 1.145
+// BenchmarkReadData-8   	       1	1167624803 ns/op	358123648 B/op	 4870362 allocs/op 1.196
+// BenchmarkReadData-8   	       1	1195088345 ns/op	358125696 B/op	 4870366 allocs/op 1.222
+func BenchmarkReadData(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		database, errorCount, lineCount := readData("hn_logs.tsv")
+		fmt.Print(len(database), errorCount, lineCount)
+	}
+}
+
 func Test_parseRecord(t *testing.T) {
 	type args struct {
 		line []string

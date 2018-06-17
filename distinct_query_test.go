@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -81,4 +82,16 @@ func Test_timeRange(t *testing.T) {
 			}
 		})
 	}
+}
+
+// 573697       3	 483784677 ns/op	61922493 B/op	   19113 allocs/op
+// 573697       3	 486602819 ns/op	61933309 B/op	   19165 allocs/op  6.245s
+func BenchmarkGetDistinctQueries(b *testing.B) {
+	database, _, _ := readData("hn_logs.tsv")
+	var count int
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		count = getDistinctQueries(database, "", "")
+	}
+	fmt.Print(count)
 }
