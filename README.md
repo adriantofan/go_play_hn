@@ -1,5 +1,52 @@
-database loading when compiled optimized  3.938896335 
-database loading when compiled optimized after removing year aggregation 3.443510763 
+## What it does ?
+
+Loads and processes data from a TSV file listing all queries performed on HN Search during a few days.
+
+It then launches a web server that answer the following queries :
+
+* `GET /1/queries/count/<DATE_PREFIX>`: returns a JSON object specifying the number of distinct queries that have been done during a specific time range
+* `GET /1/queries/popular/<DATE_PREFIX>?size=<SIZE>`: returns a JSON object listing the top <SIZE> popular queries that have been done during a specific time range
+
+## Architecture
+
+The app loads logs one by one and adds them in to a trie-like structure. The trie organizes the logs by date.  For example given the logs :
+
+        2015-08-01 00:03:42	term
+        2015-08-01 00:03:43	term1    
+        2015-08-01 00:03:44	term1    
+
+
+is stored in a six level deep trie as
+
+        2015                                <- aggregate for 2015
+        |
+        -> 08                               <- aggregate for 08 month of 2015
+            |
+            -> 01                           <- aggregate for 01 day of 08 month of 2015
+                |
+                -> 00                       <- aggregate for 00 hour for 2015-08-01
+                    |
+                    ->03                    <- aggregate for 03 minute of 2015-08-01 00:
+                        |
+                        -> 42               <- aggregate for 42 second of 2015-08-01 00:03
+
+During loading, at each level, a aggregate term count is kept in a hash table. 
+
+When all data is loaded, in a final processing step term counts are extracted form the hash table and kept sorted in a array as (term, count) pairs.
+
+The trie is uses a hash table to access children nodes.
+
+To answer how many distinct queries at 2015-08-01, just get the length of the  sorted (term, count) array at a third level 2015->08->01.
+
+To answer what are the top 5 queries at 2015-08-01, just get first 5 elements of the sorted (term, count) array at a third level 2015->08->01.
+
+Performance (amortized):
+* Answer time is proportional to O(1) for both queries. 
+* The startup time is around 3-4 seconds.
+* The load time is N log N
+* The memory usage is also proportional to N
+* The constant factors in the previous estimates are quite high. Improvements are possible, keeping more or less the same algorithm. 
+
 
 ## Notes for improvement:
 
