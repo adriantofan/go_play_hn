@@ -161,7 +161,7 @@ func TestDistinct(t *testing.T) {
 		want int
 	}{
 		{
-			"",
+			"found",
 			args{
 				trie,
 				[]int{2015},
@@ -169,7 +169,7 @@ func TestDistinct(t *testing.T) {
 			2,
 		},
 		{
-			"",
+			"not found",
 			args{
 				trie,
 				[]int{2016},
