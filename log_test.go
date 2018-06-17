@@ -146,6 +146,11 @@ func TestTopNAtDate(t *testing.T) {
 }
 
 func TestDistinct(t *testing.T) {
+	trie := MakeTrie()
+	trie.AddLog(ParseTime("2015-08-01 00:03:43"), "term1")
+	trie.AddLog(ParseTime("2015-08-01 00:03:43"), "term2")
+	trie.AddLog(ParseTime("2015-08-02 00:03:43"), "term1")
+	trie.ComputeSortedURLs()
 	type args struct {
 		t Trie
 		c []int
@@ -155,7 +160,22 @@ func TestDistinct(t *testing.T) {
 		args args
 		want int
 	}{
-		// TODO: Add test cases.
+		{
+			"",
+			args{
+				trie,
+				[]int{2015},
+			},
+			2,
+		},
+		{
+			"",
+			args{
+				trie,
+				[]int{2016},
+			},
+			0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
