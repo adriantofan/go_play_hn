@@ -13,6 +13,7 @@ import (
 
 const dateFormat = "2006-01-02 15:04:05"
 
+// BUG(adrian) is time64 good enough !? . urlP can be just url ... because it is a struct with a reference
 type record struct {
 	time int64
 	urlP *string
