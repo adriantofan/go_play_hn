@@ -50,12 +50,11 @@ Performance (amortized):
 
 ## Notes for improvement:
 
-* The deterministic algorithm cannot be easily scaled. The solution seem to be non deterministic algorithms such as hyperLogLog and family. Basically data processing can be distributed to worker nodes and results merged centrally as follows :
-
+* The deterministic algorithm cannot be easily scaled. In order to scale up, data processing can be distributed to worker nodes and results merged centrally as follows :
     - grouping by url - long tail problem, a few machines will process the most popular urls. I cannot see how to evenly distribute popular urls.
-
     - grouping by date , let's say days. The problem is that the workers need to return to the server the complete hash map for the day and then do a central merge. If not done the aggregate computation of top n can be (very) wrong. Imagine top 1 of node 1: {m:5,x:4} node 2 {b:6,x:4}. Aggregate of top 1 is {b:6,m:5 }. In reality the result is {x:8, b:6}
-
+    
+    The solution seem to be non deterministic algorithms such as hyperLogLog and family.
 
 * Given that AddLog is called on successive logs it might be possible to optimize it further such that we don't lookup the same log chain at each step
 
@@ -64,4 +63,6 @@ Performance (amortized):
 * it might be possible to not work with urls and replace them with a data structure that is basically a string hash and byte range in the file. Given that the file is memory mapped, it can work nicely, but eventually it will be very disk bound.
 
 * date parsing and conversion to components can be much improved given the standard format 
+
+* performance and especially memory consumption might be further improved using a radix tree instead of the temporary hash map that keeps the url counts
 
