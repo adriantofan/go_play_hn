@@ -74,6 +74,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		statusHandler(w, r)
 	})
+	log.Println("Server on http://localhost:8080")
 	config.logFatal(http.ListenAndServe(":8080", nil))
 }
 
