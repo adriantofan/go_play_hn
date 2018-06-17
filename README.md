@@ -7,6 +7,14 @@ It then launches a web server that answer the following queries :
 * `GET /1/queries/count/<DATE_PREFIX>`: returns a JSON object specifying the number of distinct queries that have been done during a specific time range
 * `GET /1/queries/popular/<DATE_PREFIX>?size=<SIZE>`: returns a JSON object listing the top <SIZE> popular queries that have been done during a specific time range
 
+## Install and run
+
+    $ go build
+    $ ./go_play
+    # open in browser http://127.0.0.1:8080
+    # distinct http://127.0.0.1:8080/1/queries/count/2015
+    # top n http://127.0.0.1:8080//1/queries/popular/2015
+
 ## Architecture
 
 The app loads logs one by one and adds them in to a trie-like structure. The trie organizes the logs by date.  For example given the logs :
@@ -40,11 +48,11 @@ To answer how many distinct queries at 2015-08-01, just get the length of the  s
 
 To answer what are the top 5 queries at 2015-08-01, just get first 5 elements of the sorted (term, count) array at a third level 2015->08->01.
 
-Performance (amortized):
-* Answer time is proportional to O(1) for both queries. 
+Performance (amortized) for k <= 6 (yy-mm-dd hh:mm:ss - six components):
+* Answer time is proportional to O(k) for both queries. 
 * The startup time is around 3-4 seconds.
-* The load time is N log N
-* The memory usage is also proportional to N
+* The load time is k * N log N
+* The memory usage is also proportional to k * N
 * The constant factors in the previous estimates are quite high. Improvements are possible, keeping more or less the same algorithm. 
 
 
@@ -56,13 +64,17 @@ Performance (amortized):
     
     The solution seem to be non deterministic algorithms such as hyperLogLog and family.
 
+### Speed optimizations 
 * Given that AddLog is called on successive logs it might be possible to optimize it further such that we don't lookup the same log chain at each step
 
-* It doesn't seem realistic to work with more than a few days. Given that logs are contiguous the hash of hash trie implementation could easily be replaced with an big array reducing further startup and look up time.
-
-* it might be possible to not work with urls and replace them with a data structure that is basically a string hash and byte range in the file. Given that the file is memory mapped, it can work nicely, but eventually it will be very disk bound.
+* Given that logs are contiguous the hash of hash trie implementation could easily be replaced with an big array reducing further startup and look up time.
 
 * date parsing and conversion to components can be much improved given the standard format 
+
+
+### Memory usage optimizations
+
+* it might be possible to not work with urls and replace them with a data structure that is basically a string hash and byte range in the file. Given that the file is memory mapped, it can work nicely, but eventually it will be very disk bound.
 
 * performance and especially memory consumption might be further improved using a radix tree instead of the temporary hash map that keeps the url counts
 
