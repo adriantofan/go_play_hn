@@ -81,3 +81,87 @@ func TestTrie_ComputeSortedURLs(t *testing.T) {
 	}
 
 }
+
+func TestTopNAtDate(t *testing.T) {
+	trie := MakeTrie()
+	trie.AddLog(ParseTime("2015-08-01 00:03:43"), "term1")
+	trie.AddLog(ParseTime("2015-08-01 00:03:43"), "term2")
+	trie.AddLog(ParseTime("2015-08-02 00:03:43"), "term1")
+	trie.ComputeSortedURLs()
+
+	type args struct {
+		t Trie
+		c []int
+		n int
+	}
+	tests := []struct {
+		name string
+		args args
+		want []urlCountPair
+	}{
+		{
+			"result fount - max items",
+			args{
+				trie,
+				[]int{2015, 8},
+				2,
+			},
+			[]urlCountPair{urlCountPair{"term1", 2}, urlCountPair{"term2", 1}},
+		},
+		{
+			"result fount - more than max items",
+			args{
+				trie,
+				[]int{2015, 8},
+				3,
+			},
+			[]urlCountPair{urlCountPair{"term1", 2}, urlCountPair{"term2", 1}},
+		},
+		{
+			"result fount - less than max items",
+			args{
+				trie,
+				[]int{2015, 8},
+				1,
+			},
+			[]urlCountPair{urlCountPair{"term1", 2}},
+		},
+		{
+			"result not found",
+			args{
+				trie,
+				[]int{2015, 19},
+				3,
+			},
+			[]urlCountPair{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := TopNAtDate(tt.args.t, tt.args.c, tt.args.n); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TopNAtDate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDistinct(t *testing.T) {
+	type args struct {
+		t Trie
+		c []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Distinct(tt.args.t, tt.args.c); got != tt.want {
+				t.Errorf("Distinct() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
