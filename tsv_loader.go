@@ -13,12 +13,12 @@ import (
 func readData(path string) (trie Trie, lineCount int, errorCount int) {
 	f, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		config.logFatal(err)
 		return Trie{}, 0, 0
 	}
 	defer f.Close()
 	trie = MakeTrie()
-	errorCount, lineCount = parseCSVFile(f, func(t time.Time, url string) {
+	errorCount, lineCount = parseTSVFile(f, func(t time.Time, url string) {
 		trie.AddLog(t, url)
 	})
 	log.Printf("Loaded and sorted %d lines with %d errors from file %s\n", lineCount, errorCount, path)
@@ -39,7 +39,7 @@ func parseRecord(line []string) (t time.Time, url string, err error) {
 	return
 }
 
-func parseCSVFile(f io.Reader, handler func(time.Time, string)) (errorCount int, lineCount int) {
+func parseTSVFile(f io.Reader, handler func(time.Time, string)) (errorCount int, lineCount int) {
 	errorCount = 0
 	r := csv.NewReader(f)
 	r.Comma = '\t'

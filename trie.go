@@ -1,10 +1,5 @@
 package main
 
-import (
-	"sort"
-	"time"
-)
-
 // Trie datastructure for log processing
 type Trie struct {
 	rootNode *TrieNode
@@ -36,14 +31,14 @@ func MakeTrieNode() *TrieNode {
 	return t
 }
 
-func (n *TrieNode) getOrMake(component int) (child *TrieNode) {
-	child, found := n.childs[component]
+func (pTrieNode *TrieNode) getOrMake(component int) (child *TrieNode) {
+	child, found := pTrieNode.childs[component]
 	if found {
 		return
 	}
 	//BUG(atn) remove reference to MakeTrie wich creates a specific trie with urlCount backed by a hash map
 	child = MakeTrieNode()
-	n.childs[component] = child
+	pTrieNode.childs[component] = child
 	return
 }
 
@@ -56,12 +51,12 @@ func (t Trie) Get(c []int) *TrieNode {
 }
 
 // Get returns the node with the specified prefix in trie t or nil if not found
-func (n *TrieNode) Get(c []int) *TrieNode {
+func (pTrieNode *TrieNode) Get(c []int) *TrieNode {
 	// base case
 	if len(c) == 0 {
-		return n
+		return pTrieNode
 	}
-	child, hasChild := n.childs[c[0]]
+	child, hasChild := pTrieNode.childs[c[0]]
 	if hasChild {
 		// recursive case
 		return child.Get(c[1:])
@@ -71,9 +66,9 @@ func (n *TrieNode) Get(c []int) *TrieNode {
 }
 
 // Visit calls handler eagerly for all reachable nodes starting with self
-func (n *TrieNode) Visit(handler func(*TrieNode)) {
-	handler(n)
-	for _, pChild := range n.childs {
+func (pTrieNode *TrieNode) Visit(handler func(*TrieNode)) {
+	handler(pTrieNode)
+	for _, pChild := range pTrieNode.childs {
 		pChild.Visit(handler)
 	}
 }
@@ -105,58 +100,70 @@ func (m stringIntMap) increase(url string) {
 	}
 }
 
-// AddLog navigates the trie down and adds the url to each date component
-func (n *TrieNode) AddLog(components []int, url string) {
-	n.logCounts.increase(url)
-	// add the url to subsequent levels
-	if len(components) != 1 {
-		n.getOrMake(components[0]).AddLog(components[1:], url)
+// Equal returns true if p1 is semantiqualy equal to p2
+func (p1 urlCountPair) Equal(p2 urlCountPair) bool {
+	return p1.url == p2.url && p1.count == p2.count
+}
+
+// Equal returns true if the two tries are semanticaly equal
+func (t Trie) Equal(trie2 Trie) bool {
+	return t.rootNode.Equal(trie2.rootNode)
+}
+
+// Equal returns true if pTrieNode is semantiqualy equal to trieNode2
+func (pTrieNode *TrieNode) Equal(trieNode2 *TrieNode) bool {
+	if pTrieNode == trieNode2 {
+		return true
 	}
-}
-
-// AddLog parses time in to a date component array and uses and uses root node add to pass the url allong the trie
-func (t Trie) AddLog(date time.Time, url string) {
-	components := LogDateComponents(date)
-	t.rootNode.AddLog(components[:], url)
-}
-
-func (t Trie) ComputeSortedURLs() {
-	t.Visit(func(n *TrieNode) {
-		sorted := []urlCountPair{}
-		if n.logCounts == nil {
-			return
-		}
-		for url, count := range n.logCounts {
-			sorted = append(sorted, urlCountPair{url, count})
-		}
-		sort.Slice(sorted, func(i, j int) bool {
-			return sorted[i].count > sorted[j].count
-		})
-		n.sortedUrls = &sorted
-		n.logCounts = nil
-	})
-}
-
-// TopNAtDate returns top n urls at the given date where c contains the most significants components of that date
-// [Year, Month, Day, Hour, Minute, Seccond]. For example in 2012 c is [2012]; in 2012-12 c is [2012, 12]
-func TopNAtDate(t Trie, c []int, n int) []urlCountPair {
-	node := t.Get(c)
-	if node != nil && node.sortedUrls != nil && len(*node.sortedUrls) > 0 {
-		if n > len(*node.sortedUrls) {
-			n = len(*node.sortedUrls)
-		}
-		result := (*node.sortedUrls)[:n]
-		return result
+	if (pTrieNode == nil && trieNode2 != nil) || (pTrieNode != nil && trieNode2 == nil) {
+		return false
 	}
-	return []urlCountPair{}
-}
-
-// Distinct returns the how many distinct urls are at the given date, where c contains the most significants components of the date
-// [Year, Month, Day, Hour, Minute, Seccond]. For example in 2012 c is [2012]; in 2012-12 c is [2012, 12]
-func Distinct(t Trie, c []int) int {
-	node := t.Get(c)
-	if node != nil && node.sortedUrls != nil {
-		return len(*node.sortedUrls)
+	if pTrieNode == nil && trieNode2 == nil {
+		return true
 	}
-	return 0
+	if pTrieNode.logCounts == nil && trieNode2.logCounts != nil ||
+		pTrieNode.logCounts != nil && trieNode2.logCounts == nil {
+		return false
+	}
+	if len(pTrieNode.childs) != len(trieNode2.childs) ||
+		len(pTrieNode.childs) != len(trieNode2.childs) {
+		return false
+	}
+	if pTrieNode.sortedUrls == nil && trieNode2.sortedUrls != nil ||
+		pTrieNode.sortedUrls != nil && trieNode2.sortedUrls == nil {
+		return false
+	}
+
+	if pTrieNode.sortedUrls != nil && trieNode2.sortedUrls != nil {
+		if len(*pTrieNode.sortedUrls) != len(*trieNode2.sortedUrls) {
+			return false
+		}
+		for i := 0; i < len(*pTrieNode.sortedUrls); i++ {
+			if !(*pTrieNode.sortedUrls)[i].Equal((*trieNode2.sortedUrls)[i]) {
+				return false
+			}
+		}
+	}
+	for logURL1, logCounpTrieNode1 := range pTrieNode.logCounts {
+		logCountrieNode2, foundCountrieNode2 := trieNode2.logCounts[logURL1]
+		if !foundCountrieNode2 || logCountrieNode2 != logCounpTrieNode1 {
+			return false
+		}
+	}
+	for key1, childP1 := range pTrieNode.childs {
+		childP2, foundKey2 := trieNode2.childs[key1]
+		if !foundKey2 {
+			return false
+		}
+		if childP1 != nil && childP2 == nil ||
+			childP1 == nil && childP2 != nil {
+			return false
+		}
+		if childP1 != nil && childP2 != nil {
+			if !childP1.Equal(childP2) {
+				return false
+			}
+		}
+	}
+	return true
 }
