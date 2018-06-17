@@ -81,5 +81,8 @@ Performance (amortized) for k <= 6 (yy-mm-dd hh:mm:ss - six components):
 
 ## Updates
 
- - 19/06/18 added unit test for ComputeTopNQueries and fixes issue where size param is not interpreted correctly
- - 19/06/18 the test for ComputeSortedURLs is non deterministic because the urls are not sorted. Now using a more appropriate test set 
+### V1.1 
+
+ -  added unit test for ComputeTopNQueries and fixes issue where size param is not interpreted correctly
+ -  the test for ComputeSortedURLs is non deterministic because the urls are not sorted. Now using a more appropriate test set 
+ -  the test for topNHandler

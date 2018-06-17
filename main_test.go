@@ -90,8 +90,39 @@ func TestComputeDistinctQueryCount(t *testing.T) {
 }
 
 func Test_topNHandler(t *testing.T) {
-	t.Errorf("implement same as Test_distinctQueryCountHandler")
-
+	savedComputeTopNQueries := config.computeTopNQueries
+	requestPath := topNURL + "2222-01-01"
+	requestParams := url.Values{"size": {"1"}}
+	config.computeTopNQueries = func(trie Trie, path string, params url.Values) []QueryCountPair {
+		if trie != config.trie {
+			t.Errorf("topNQueriesCountHandler should get global trie %v got %v", config.trie, trie)
+		}
+		if path != requestPath {
+			t.Errorf("topNQueriesCountHandler should get request path %v got %v", requestPath, path)
+		}
+		if !reflect.DeepEqual(params, requestParams) {
+			t.Errorf("topNQueriesCountHandler should get request params %v got %v", requestParams, params)
+		}
+		return []QueryCountPair{
+			QueryCountPair{"one", 100}}
+	}
+	req, err := http.NewRequest("GET", requestPath+"?size=1", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(topNHandler)
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+	expected := `{"queries":[{"query":"one","count":100}]}`
+	if rr.Body.String() != expected {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), expected)
+	}
+	config.computeTopNQueries = savedComputeTopNQueries
 }
 
 func TestComputeTopNQueries(t *testing.T) {
