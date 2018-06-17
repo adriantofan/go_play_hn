@@ -88,7 +88,7 @@ func ComputeTopNQueries(trie Trie, path string, params url.Values) []QueryCountP
 	count := 5
 	countStrs, foundCount := params["size"]
 	if foundCount && len(countStrs) > 0 {
-		if parsedCount, parsed := strconv.ParseInt(countStrs[0], 10, 64); parsed != nil {
+		if parsedCount, err := strconv.ParseInt(countStrs[0], 10, 64); err == nil {
 			count = int(parsedCount)
 		}
 	}

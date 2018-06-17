@@ -78,3 +78,8 @@ Performance (amortized) for k <= 6 (yy-mm-dd hh:mm:ss - six components):
 
 * performance and especially memory consumption might be further improved using a radix tree instead of the temporary hash map that keeps the url counts
 
+
+## Updates
+
+ - 19/06/18 added unit test for ComputeTopNQueries and fixes issue where size param is not interpreted correctly
+ - 

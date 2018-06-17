@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -93,5 +95,84 @@ func Test_topNHandler(t *testing.T) {
 }
 
 func TestComputeTopNQueries(t *testing.T) {
-	t.Errorf("implement same as TestComputeDistinctQueryCount")
+	trie := MakeTrie()
+	n := trie.rootNode.getOrMake(2015)
+	n.sortedUrls = &[]QueryCountPair{
+		QueryCountPair{"one", 100},
+		QueryCountPair{"two", 90},
+		QueryCountPair{"three", 80},
+		QueryCountPair{"four", 70},
+		QueryCountPair{"five", 60},
+		QueryCountPair{"six", 50},
+	}
+	type args struct {
+		trie   Trie
+		path   string
+		params url.Values
+	}
+	tests := []struct {
+		name string
+		args args
+		want []QueryCountPair
+	}{
+		{
+			"happy path",
+			args{
+				trie,
+				topNURL + "2015",
+				url.Values{},
+			},
+			[]QueryCountPair{
+				QueryCountPair{"one", 100},
+				QueryCountPair{"two", 90},
+				QueryCountPair{"three", 80},
+				QueryCountPair{"four", 70},
+				QueryCountPair{"five", 60},
+			},
+		},
+		{
+			"more than size",
+			args{
+				trie,
+				topNURL + "2015",
+				url.Values{"size": {"10"}},
+			},
+			[]QueryCountPair{
+				QueryCountPair{"one", 100},
+				QueryCountPair{"two", 90},
+				QueryCountPair{"three", 80},
+				QueryCountPair{"four", 70},
+				QueryCountPair{"five", 60},
+				QueryCountPair{"six", 50},
+			},
+		},
+		{
+			"less than size",
+			args{
+				trie,
+				topNURL + "2015",
+				url.Values{"size": {"2"}},
+			},
+			[]QueryCountPair{
+				QueryCountPair{"one", 100},
+				QueryCountPair{"two", 90},
+			},
+		},
+		{
+			"no date",
+			args{
+				trie,
+				topNURL,
+				url.Values{"size": {"2"}},
+			},
+			[]QueryCountPair{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ComputeTopNQueries(tt.args.trie, tt.args.path, tt.args.params); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ComputeTopNQueries() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
