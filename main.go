@@ -9,6 +9,6 @@ var config = struct {
 func main() {
 	const queryCountURL string = "/1/queries/count/"
 	const topNURL string = "/1/queries/count/"
-	_, _, _ = readData("../go/hn_logs.tsv")
+	_, _, _ = readData("hn_logs.tsv")
 	// log.Fatal(http.ListenAndServe(":8080", nil))
 }

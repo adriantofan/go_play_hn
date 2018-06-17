@@ -4,18 +4,18 @@ import "testing"
 
 func Benchmark_loadData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		t, _, _ := readData("../go/hn_logs.tsv")
+		t, _, _ := readData("hn_logs.tsv")
 		t.ComputeTops()
 	}
 }
 
 func Benchmark_readData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		readData("../go/hn_logs.tsv")
+		readData("hn_logs.tsv")
 	}
 }
 func Benchmark_computeTops(b *testing.B) {
-	t, _, _ := readData("../go/hn_logs.tsv")
+	t, _, _ := readData("hn_logs.tsv")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		t.ComputeTops()

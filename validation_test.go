@@ -1,13 +1,28 @@
 package main
 
 import (
+	"reflect"
+	"sync"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
+var (
+	trie       Trie
+	lineCount  int
+	errorCount int
+	loadOnce   sync.Once
+)
+
+func loadRealData() (Trie, int, int) {
+	loadOnce.Do(func() {
+		trie, lineCount, errorCount = readData("hn_logs.tsv")
+	})
+	return trie, lineCount, errorCount
+
+}
+
 func Test_readDataCount(t *testing.T) {
-	_, lineCount, errorCount := readData("../go/hn_logs.tsv")
+	_, lineCount, errorCount := loadRealData()
 	if errorCount != 0 {
 		t.Errorf("readData() errorCount = %v, want %v", errorCount, 0)
 	}
@@ -16,7 +31,7 @@ func Test_readDataCount(t *testing.T) {
 	}
 }
 func Test_DistinctValidation(t *testing.T) {
-	trie, _, _ := readData("../go/hn_logs.tsv")
+	trie, _, _ := loadRealData()
 	trie.ComputeTops()
 	type args struct {
 		t Trie
@@ -58,7 +73,7 @@ func Test_DistinctValidation(t *testing.T) {
 }
 
 func Test_TopNAtDate(t *testing.T) {
-	trie, _, _ := readData("../go/hn_logs.tsv")
+	trie, _, _ := loadRealData()
 	trie.ComputeTops()
 	type args struct {
 		t Trie
@@ -93,7 +108,7 @@ func Test_TopNAtDate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := TopNAtDate(tt.args.t, tt.args.c, tt.args.n); !cmp.Equal(got, tt.want) {
+			if got := TopNAtDate(tt.args.t, tt.args.c, tt.args.n); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Distinct() = %v, want %v", got, tt.want)
 			}
 		})
