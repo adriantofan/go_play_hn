@@ -10,7 +10,7 @@ It then launches a web server that answer the following queries :
 ## Install and run
 
     $ go build
-    $ ./go_play
+    $ ./go_play_hn
     # open in browser http://127.0.0.1:8080
     # distinct http://127.0.0.1:8080/1/queries/count/2015
     # top n http://127.0.0.1:8080//1/queries/popular/2015
