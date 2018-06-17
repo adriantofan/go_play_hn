@@ -32,6 +32,9 @@ func MakeTrieNode() *TrieNode {
 }
 
 func (pTrieNode *TrieNode) getOrMake(component int) (child *TrieNode) {
+	if pTrieNode == nil {
+		return
+	}
 	child, found := pTrieNode.childs[component]
 	if found {
 		return
@@ -98,72 +101,4 @@ func (m stringIntMap) increase(url string) {
 	} else {
 		m[url] = 1
 	}
-}
-
-// Equal returns true if p1 is semantiqualy equal to p2
-func (p1 urlCountPair) Equal(p2 urlCountPair) bool {
-	return p1.url == p2.url && p1.count == p2.count
-}
-
-// Equal returns true if the two tries are semanticaly equal
-func (t Trie) Equal(trie2 Trie) bool {
-	return t.rootNode.Equal(trie2.rootNode)
-}
-
-// Equal returns true if pTrieNode is semantiqualy equal to trieNode2
-func (pTrieNode *TrieNode) Equal(trieNode2 *TrieNode) bool {
-	if pTrieNode == trieNode2 {
-		return true
-	}
-	if (pTrieNode == nil && trieNode2 != nil) || (pTrieNode != nil && trieNode2 == nil) {
-		return false
-	}
-	if pTrieNode == nil && trieNode2 == nil {
-		return true
-	}
-	if pTrieNode.logCounts == nil && trieNode2.logCounts != nil ||
-		pTrieNode.logCounts != nil && trieNode2.logCounts == nil {
-		return false
-	}
-	if len(pTrieNode.childs) != len(trieNode2.childs) ||
-		len(pTrieNode.childs) != len(trieNode2.childs) {
-		return false
-	}
-	if pTrieNode.sortedUrls == nil && trieNode2.sortedUrls != nil ||
-		pTrieNode.sortedUrls != nil && trieNode2.sortedUrls == nil {
-		return false
-	}
-
-	if pTrieNode.sortedUrls != nil && trieNode2.sortedUrls != nil {
-		if len(*pTrieNode.sortedUrls) != len(*trieNode2.sortedUrls) {
-			return false
-		}
-		for i := 0; i < len(*pTrieNode.sortedUrls); i++ {
-			if !(*pTrieNode.sortedUrls)[i].Equal((*trieNode2.sortedUrls)[i]) {
-				return false
-			}
-		}
-	}
-	for logURL1, logCounpTrieNode1 := range pTrieNode.logCounts {
-		logCountrieNode2, foundCountrieNode2 := trieNode2.logCounts[logURL1]
-		if !foundCountrieNode2 || logCountrieNode2 != logCounpTrieNode1 {
-			return false
-		}
-	}
-	for key1, childP1 := range pTrieNode.childs {
-		childP2, foundKey2 := trieNode2.childs[key1]
-		if !foundKey2 {
-			return false
-		}
-		if childP1 != nil && childP2 == nil ||
-			childP1 == nil && childP2 != nil {
-			return false
-		}
-		if childP1 != nil && childP2 != nil {
-			if !childP1.Equal(childP2) {
-				return false
-			}
-		}
-	}
-	return true
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 	"time"
 )
@@ -18,213 +19,76 @@ func TestTrie_ComputeTops(t *testing.T) {
 
 }
 
-func TestEqualTrieNode(t *testing.T) {
+func TestMakeTrieNode(t *testing.T) {
+	ptn := MakeTrieNode()
+	if ptn == nil {
+		t.Errorf("MakeTrieNode() returns nil")
+	}
+	if ptn.logCounts == nil {
+		t.Errorf("MakeTrieNode() should initialize logCounts")
+	}
+	if ptn.childs == nil {
+		t.Errorf("MakeTrieNode() should initialize childs")
+	}
+	if ptn.sortedUrls != nil {
+		t.Errorf("MakeTrieNode() should not initialize childs")
+	}
+}
+
+func TestMakeTrie(t *testing.T) {
+	if MakeTrie().rootNode == nil {
+		t.Errorf("MakeTrie() should create a root node")
+	}
+}
+
+func TestTrieNode_getOrMake(t *testing.T) {
+	trie = MakeTrie()
+	if len(trie.rootNode.childs) != 0 {
+		t.Errorf("MakeTrie() should not create child nodes")
+	}
+	pTrieNode := trie.rootNode.getOrMake(0)
+	if pTrieNode == nil {
+		t.Errorf("getOrMake() should return a new node, got nil")
+	}
+	gotNode, foundNode := trie.rootNode.childs[0]
+	if !foundNode || !reflect.DeepEqual(gotNode, pTrieNode) {
+		t.Errorf("getOrMake() should properly insert a new node in to childs")
+	}
+	if len(trie.rootNode.childs) != 1 || trie.rootNode.getOrMake(0) != pTrieNode {
+		t.Errorf("getOrMake() should not reinsert a node on the same position")
+	}
+	var empty *TrieNode
+	if empty.getOrMake(1) != nil {
+		t.Errorf("getOrMake() should not create nodes on empty recievers")
+	}
+}
+
+func TestTrieNode_Get(t *testing.T) {
+	type fields struct {
+		logCounts  stringIntMap
+		childs     map[int]*TrieNode
+		sortedUrls *[]urlCountPair
+	}
 	type args struct {
-		t1 *TrieNode
-		t2 *TrieNode
+		c []int
 	}
 	tests := []struct {
-		name string
-		args args
-		want bool
+		name   string
+		fields fields
+		args   args
+		want   *TrieNode
 	}{
-		{
-			"both nil",
-			args{nil, nil},
-			true,
-		},
-		{
-			"both nil",
-			args{&TrieNode{}, nil},
-			false,
-		},
-		{
-			"both nil",
-			args{nil, &TrieNode{}},
-			false,
-		},
-		{
-			"diffrent childs length",
-			args{&TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: nil},
-				nil,
-			}, &TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{},
-				nil,
-			}},
-			false,
-		},
-		{
-			"diffrent logCounts length",
-			args{&TrieNode{
-				map[string]int{"2": 1},
-				map[int]*TrieNode{},
-				nil,
-			}, &TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				nil,
-			}},
-			false,
-		},
-		{
-			"diffrent logCounts count for the same url",
-			args{&TrieNode{
-				map[string]int{"2": 1},
-				map[int]*TrieNode{},
-				nil,
-			}, &TrieNode{
-				map[string]int{"2": 2},
-				map[int]*TrieNode{},
-				nil,
-			}},
-			false,
-		},
-		{
-			"logCounts url not present ",
-			args{&TrieNode{
-				map[string]int{"2": 1},
-				map[int]*TrieNode{},
-				nil,
-			}, &TrieNode{
-				map[string]int{"1": 1},
-				map[int]*TrieNode{},
-				nil,
-			}},
-			false,
-		},
-		{
-			"diffrent left urlCountPair nil right non nil",
-			args{&TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				nil,
-			}, &TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				&[]urlCountPair{{"1", 1}},
-			}},
-			false,
-		},
-		{
-			"diffrent left urlCountPair non nil right nil",
-			args{&TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				&[]urlCountPair{{"1", 1}},
-			}, &TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				nil,
-			}},
-			false,
-		},
-		{
-			"diffrent urlCountPair length",
-			args{&TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				&[]urlCountPair{{"1", 1}},
-			}, &TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				&[]urlCountPair{},
-			}},
-			false,
-		},
-		{
-			"urlCountPair same lenght diffrent value",
-			args{&TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				&[]urlCountPair{{"1", 1}},
-			}, &TrieNode{
-				map[string]int{},
-				map[int]*TrieNode{},
-				&[]urlCountPair{{"1", 2}},
-			}},
-			false,
-		},
-		{
-			"childs not equal",
-			args{&TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: &TrieNode{
-					stringIntMap{},
-					map[int]*TrieNode{1: nil},
-					nil,
-				}},
-				nil,
-			}, &TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: &TrieNode{
-					stringIntMap{},
-					map[int]*TrieNode{},
-					nil,
-				}},
-				nil,
-			}},
-			false,
-		},
-		{
-			"child left nil right non nil",
-			args{&TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: nil},
-				nil,
-			}, &TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: &TrieNode{}},
-				nil,
-			}},
-			false,
-		},
-		{
-			"child left non nil right nil",
-			args{&TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: &TrieNode{}},
-				nil,
-			}, &TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: nil},
-				nil,
-			}},
-			false,
-		},
-		{
-			"child left not equal right",
-			args{&TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: &TrieNode{}},
-				nil,
-			}, &TrieNode{
-				stringIntMap{},
-				map[int]*TrieNode{1: nil},
-				nil,
-			}},
-			false,
-		},
-		{
-			"equal",
-			args{&TrieNode{
-				map[string]int{"2": 1},
-				map[int]*TrieNode{1: &TrieNode{}},
-				&[]urlCountPair{{"1", 2}},
-			}, &TrieNode{
-				map[string]int{"2": 1},
-				map[int]*TrieNode{1: &TrieNode{}},
-				&[]urlCountPair{{"1", 2}},
-			}},
-			true,
-		},
+		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.args.t1.Equal(tt.args.t2); got != tt.want {
-				t.Errorf("EqualTrieNode() = %v, want %v", got, tt.want)
+			pTrieNode := &TrieNode{
+				logCounts:  tt.fields.logCounts,
+				childs:     tt.fields.childs,
+				sortedUrls: tt.fields.sortedUrls,
+			}
+			if got := pTrieNode.Get(tt.args.c); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TrieNode.Get() = %v, want %v", got, tt.want)
 			}
 		})
 	}

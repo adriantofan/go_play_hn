@@ -116,7 +116,7 @@ func Test_readData(t *testing.T) {
 				gotFatal = true
 			}
 			gotTrie, gotLineCount, gotErrorCount := readData(tt.args.path)
-			if !gotTrie.Equal(tt.wantTrie) {
+			if !reflect.DeepEqual(gotTrie, tt.wantTrie) {
 				t.Errorf("readData() gotTrie = %v, want %v", gotTrie, tt.wantTrie)
 			}
 			if gotLineCount != tt.wantLineCount {
