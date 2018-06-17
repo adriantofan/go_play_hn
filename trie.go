@@ -61,6 +61,10 @@ func (pTrieNode *TrieNode) Get(c []int) *TrieNode {
 	}
 	child, hasChild := pTrieNode.childs[c[0]]
 	if hasChild {
+		// child is a leaf
+		if len(child.childs) == 0 {
+			return child
+		}
 		// recursive case
 		return child.Get(c[1:])
 	}
