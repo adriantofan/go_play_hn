@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
+	"time"
 )
+
+func pt(s string) time.Time {
+	t, _ := time.Parse("2006-01-02 15:04:05", s)
+	return t.UTC()
+}
 
 func strP(s string) *string {
 	return &s
@@ -28,6 +33,12 @@ func strP(s string) *string {
 // BenchmarkReadData-8   	       1	1335289881 ns/op	462216640 B/op	 4870359 allocs/op
 // BenchmarkReadData-8   	       1	1267709804 ns/op	462216640 B/op	 4870359 allocs/op
 // BenchmarkReadData-8   	       1	1339727746 ns/op	462216832 B/op	 4870362 allocs/op
+
+// BenchmarkReadData-8   	       1	1621703140 ns/op	665249584 B/op	 4870366 allocs/op
+// BenchmarkReadData-8   	       1	1739551230 ns/op	665247472 B/op	 4870361 allocs/op
+// BenchmarkReadData-8   	       1	1657654081 ns/op	665247568 B/op	 4870362 allocs/op
+// BenchmarkReadData-8   	       1	1689174244 ns/op	665247472 B/op	 4870361 allocs/op
+// BenchmarkReadData-8   	       1	1667111939 ns/op	665247472 B/op	 4870361 allocs/op
 
 func BenchmarkReadData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
@@ -61,7 +72,7 @@ func Test_parseRecord(t *testing.T) {
 		{
 			"decodes a line",
 			args{[]string{"2006-01-02 15:04:05", "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"}},
-			&record{1136214245000000000, "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"},
+			&record{pt("2006-01-02 15:04:05"), "http%3A%2F%2Fblog.thiagorodrigo.com.br%2Fcupom-desconto-natue"},
 			false,
 		},
 	}
@@ -78,24 +89,7 @@ func Test_parseRecord(t *testing.T) {
 		})
 	}
 }
-func Test_Open(t *testing.T) {
-	_, srcFilename, _, _ := runtime.Caller(0)
-	filename := filepath.Dir(srcFilename) + ""
-	fmt.Println(filename)
-	f, err := os.Open(filename)
-	if err != nil {
-		fmt.Println("fail", err)
-	} else {
-		fmt.Println("success")
-	}
-	bytes := make([]byte, 100)
-	_, err = f.Read(bytes)
-	if err != nil {
-		fmt.Println("fail read", err)
-	} else {
-		fmt.Println("read success")
-	}
-}
+
 func Test_readData(t *testing.T) {
 	type args struct {
 		path string
@@ -112,10 +106,10 @@ func Test_readData(t *testing.T) {
 			"parses a simple file and reports errors",
 			args{filepath.Dir(filename) + "/test_small.tsv"},
 			[]record{
-				{1438387420000000000, "go.co"},
-				{1438387421000000000, "google.com"},
-				{1438387422000000000, "facebook.com"},
-				{1438387423000000000, "google.com"},
+				{pt("2015-08-01 00:03:40"), "go.co"},
+				{pt("2015-08-01 00:03:41"), "google.com"},
+				{pt("2015-08-01 00:03:42"), "facebook.com"},
+				{pt("2015-08-01 00:03:43"), "google.com"},
 			},
 			2,
 			6,

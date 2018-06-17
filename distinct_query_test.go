@@ -7,22 +7,18 @@ import (
 	"time"
 )
 
-func ts(s string) int64 {
-	t, _ := time.Parse("2006-01-02 15:04:05", s)
-	return t.UnixNano()
-}
 func Test_getDistinct(t *testing.T) {
 	type args struct {
-		database []record
-		startTs  int64
-		endTs    int64
+		database  []record
+		startTime time.Time
+		endTime   time.Time
 	}
 	testDb := []record{
-		{ts("2006-01-02 15:04:05"), "urlA"},
-		{ts("2006-01-02 15:04:05"), "urlA"},
-		{ts("2006-01-02 15:04:05"), "urlB"},
-		{ts("2006-01-03 15:04:05"), "urlC"},
-		{ts("2006-01-04 15:04:05"), "urlD"},
+		{pt("2006-01-02 15:04:05"), "urlA"},
+		{pt("2006-01-02 15:04:05"), "urlA"},
+		{pt("2006-01-02 15:04:05"), "urlB"},
+		{pt("2006-01-03 15:04:05"), "urlC"},
+		{pt("2006-01-04 15:04:05"), "urlD"},
 	}
 
 	tests := []struct {
@@ -32,43 +28,43 @@ func Test_getDistinct(t *testing.T) {
 	}{
 		{
 			"no overlap on the left ",
-			args{testDb, ts("2004-01-01 01:01:00"), ts("2005-01-01 01:01:00")},
+			args{testDb, pt("2004-01-01 01:01:00"), pt("2005-01-01 01:01:00")},
 			0,
 		},
 		{
 			"start outide and end inside",
-			args{testDb, ts("2004-01-01 01:01:00"), ts("2006-01-02 16:01:00")},
+			args{testDb, pt("2004-01-01 01:01:00"), pt("2006-01-02 16:01:00")},
 			2,
 		},
 		{
 			"start inside and end inside",
-			args{testDb, ts("2006-01-02 15:04:05"), ts("2006-01-02 16:01:00")},
+			args{testDb, pt("2006-01-02 15:04:05"), pt("2006-01-02 16:01:00")},
 			2,
 		},
 		{
 			"start inside and end outside",
-			args{testDb, ts("2006-01-02 16:01:00"), ts("2007-01-01 01:01:00")},
+			args{testDb, pt("2006-01-02 16:01:00"), pt("2007-01-01 01:01:00")},
 			2,
 		},
 		{
 			"no overlap on the right",
-			args{testDb, ts("2007-01-01 01:01:00"), ts("2008-01-01 01:01:00")},
+			args{testDb, pt("2007-01-01 01:01:00"), pt("2008-01-01 01:01:00")},
 			0,
 		},
 		{
 			"all",
-			args{testDb, 0, 0xffffffff},
+			args{testDb, time.Time{}, time.Time{}},
 			4,
 		},
 		{
 			"all - start / end inversed",
-			args{testDb, 0xffffffff, 0},
+			args{testDb, pt("5000-01-01 01:01:00"), time.Time{}},
 			4,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getDistinct(tt.args.database, tt.args.startTs, tt.args.endTs); got != tt.want {
+			if got := getDistinct(tt.args.database, tt.args.startTime, tt.args.endTime); got != tt.want {
 				t.Errorf("getDistinct() = %v, want %v", got, tt.want)
 			}
 		})
@@ -83,11 +79,11 @@ func Test_getDistinctQueries(t *testing.T) {
 	}
 
 	testDb := []record{
-		{ts("2006-01-02 15:04:05"), "urlA"},
-		{ts("2006-01-02 15:04:05"), "urlA"},
-		{ts("2006-01-02 15:04:05"), "urlB"},
-		{ts("2006-01-03 15:04:05"), "urlC"},
-		{ts("2006-01-04 15:04:05"), "urlD"},
+		{pt("2006-01-02 15:04:05"), "urlA"},
+		{pt("2006-01-02 15:04:05"), "urlA"},
+		{pt("2006-01-02 15:04:05"), "urlB"},
+		{pt("2006-01-03 15:04:05"), "urlC"},
+		{pt("2006-01-04 15:04:05"), "urlD"},
 	}
 
 	tests := []struct {
@@ -230,6 +226,13 @@ func Test_timeRange(t *testing.T) {
 // 573697       3	 435760932 ns/op	61948077 B/op	   19236 allocs/op
 // 573697       3	 456520327 ns/op	61919720 B/op	   19100 allocs/op
 // 573697       3	 454580880 ns/op	61916392 B/op	   19084 allocs/op
+
+// macbook pro with date.Time
+// 573697       3	 339206517 ns/op	61934418 B/op	   19171 allocs/op
+// 573697       3	 429861690 ns/op	61913410 B/op	   19070 allocs/op
+// 573697       2	 539505379 ns/op	61925312 B/op	   19128 allocs/op
+// 573697       3	 425834306 ns/op	61923949 B/op	   19120 allocs/op
+// 573697       3	 459390444 ns/op	61897818 B/op	   18995 allocs/op
 
 func BenchmarkGetDistinctQueries(b *testing.B) {
 	database, _, _ := readData("hn_logs.tsv")
