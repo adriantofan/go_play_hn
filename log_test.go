@@ -41,31 +41,31 @@ func TestTrie_ComputeSortedURLs(t *testing.T) {
 	})
 	tests := []struct {
 		timeArray       []int
-		wantSortedTerms []urlCountPair
+		wantSortedTerms []QueryCountPair
 	}{
 		{
 			[]int{2015},
-			[]urlCountPair{urlCountPair{"term1", 2}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8},
-			[]urlCountPair{urlCountPair{"term1", 2}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1},
-			[]urlCountPair{urlCountPair{"term1", 1}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1, 0},
-			[]urlCountPair{urlCountPair{"term1", 1}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1, 0, 3},
-			[]urlCountPair{urlCountPair{"term1", 1}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
 		},
 		{
 			[]int{2015, 8, 1, 0, 3, 43},
-			[]urlCountPair{urlCountPair{"term1", 1}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 1}, QueryCountPair{"term2", 1}},
 		},
 	}
 	// BUG(adrian) for the same url count the result is not deterministic  [{term1 1} {term2 1}] sortedUrls &[{term2 1} {term1 1}]
@@ -97,7 +97,7 @@ func TestTopNAtDate(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want []urlCountPair
+		want []QueryCountPair
 	}{
 		{
 			"result fount - max items",
@@ -106,7 +106,7 @@ func TestTopNAtDate(t *testing.T) {
 				[]int{2015, 8},
 				2,
 			},
-			[]urlCountPair{urlCountPair{"term1", 2}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 		{
 			"result fount - more than max items",
@@ -115,7 +115,7 @@ func TestTopNAtDate(t *testing.T) {
 				[]int{2015, 8},
 				3,
 			},
-			[]urlCountPair{urlCountPair{"term1", 2}, urlCountPair{"term2", 1}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}, QueryCountPair{"term2", 1}},
 		},
 		{
 			"result fount - less than max items",
@@ -124,7 +124,7 @@ func TestTopNAtDate(t *testing.T) {
 				[]int{2015, 8},
 				1,
 			},
-			[]urlCountPair{urlCountPair{"term1", 2}},
+			[]QueryCountPair{QueryCountPair{"term1", 2}},
 		},
 		{
 			"result not found",
@@ -133,7 +133,7 @@ func TestTopNAtDate(t *testing.T) {
 				[]int{2015, 19},
 				3,
 			},
-			[]urlCountPair{},
+			[]QueryCountPair{},
 		},
 	}
 	for _, tt := range tests {

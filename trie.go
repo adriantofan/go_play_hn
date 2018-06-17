@@ -10,12 +10,13 @@ type Trie struct {
 type TrieNode struct {
 	logCounts  stringIntMap
 	childs     map[int]*TrieNode
-	sortedUrls *[]urlCountPair
+	sortedUrls *[]QueryCountPair
 }
 
-type urlCountPair struct {
-	url   string
-	count int
+// QueryCountPair used internaly and in kind'of hackish way to display the json
+type QueryCountPair struct {
+	Query string `json:"query"`
+	Count int    `json:"count"`
 }
 
 // MakeTrie creates a Trie initialized with a root node

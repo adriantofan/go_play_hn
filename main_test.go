@@ -86,3 +86,12 @@ func TestComputeDistinctQueryCount(t *testing.T) {
 		})
 	}
 }
+
+func Test_topNHandler(t *testing.T) {
+	t.Errorf("implement same as Test_distinctQueryCountHandler")
+
+}
+
+func TestComputeTopNQueries(t *testing.T) {
+	t.Errorf("todo")
+}

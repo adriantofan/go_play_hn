@@ -22,15 +22,15 @@ func (t Trie) AddLog(date time.Time, url string) {
 
 func (t Trie) ComputeSortedURLs() {
 	t.Visit(func(n *TrieNode) {
-		sorted := []urlCountPair{}
+		sorted := []QueryCountPair{}
 		if n.logCounts == nil {
 			return
 		}
 		for url, count := range n.logCounts {
-			sorted = append(sorted, urlCountPair{url, count})
+			sorted = append(sorted, QueryCountPair{url, count})
 		}
 		sort.Slice(sorted, func(i, j int) bool {
-			return sorted[i].count > sorted[j].count
+			return sorted[i].Count > sorted[j].Count
 		})
 		n.sortedUrls = &sorted
 		n.logCounts = nil
@@ -39,7 +39,7 @@ func (t Trie) ComputeSortedURLs() {
 
 // TopNAtDate returns top n urls at the given date where c contains the most significants components of that date
 // [Year, Month, Day, Hour, Minute, Seccond]. For example in 2012 c is [2012]; in 2012-12 c is [2012, 12]
-func TopNAtDate(t Trie, c []int, n int) []urlCountPair {
+func TopNAtDate(t Trie, c []int, n int) []QueryCountPair {
 	node := t.Get(c)
 	if node != nil && node.sortedUrls != nil && len(*node.sortedUrls) > 0 {
 		if n > len(*node.sortedUrls) {
@@ -48,7 +48,7 @@ func TopNAtDate(t Trie, c []int, n int) []urlCountPair {
 		result := (*node.sortedUrls)[:n]
 		return result
 	}
-	return []urlCountPair{}
+	return []QueryCountPair{}
 }
 
 // Distinct returns the how many distinct urls are at the given date, where c contains the most significants components of the date

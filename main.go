@@ -20,6 +20,7 @@ var config = struct {
 	logCount                  int
 	errorCount                int
 	computeDistinctQueryCount func(Trie, string) int
+	computeTopNQueries        func(trie Trie, path string, params url.Values) []QueryCountPair
 }{
 	"2006-01-02 15:04:05", // configuration
 	log.Fatal,             // production configuration
@@ -27,6 +28,7 @@ var config = struct {
 	0,                     // data from file
 	0,                     // data from file
 	ComputeDistinctQueryCount, // production configuration
+	ComputeTopNQueries,
 }
 
 // Returns a formated JSON answeing the query. Uses config.distinctQueryCountHandler to do the hard lifting
@@ -41,9 +43,9 @@ func distinctQueryCountHandler(w http.ResponseWriter, r *http.Request) {
 
 func topNHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
-	results := ComputeTopNQueries(config.trie, r.URL.Path, r.URL.Query())
+	results := config.computeTopNQueries(config.trie, r.URL.Path, r.URL.Query())
 	result, _ := json.Marshal(struct {
-		Queries []urlCountPair
+		Queries []QueryCountPair `json:"queries"`
 	}{
 		results,
 	})
@@ -74,13 +76,13 @@ func main() {
 }
 
 // ComputeTopNQueries computes distinct query counts for urls such as /1/queries/count/2015-08-03
-func ComputeTopNQueries(trie Trie, path string, params url.Values) []urlCountPair {
+func ComputeTopNQueries(trie Trie, path string, params url.Values) []QueryCountPair {
 	dateString := strings.TrimPrefix(path, topNURL)
 	dateComponents := LogDateComponentsFromString(dateString)
 	if len(dateComponents) == 0 {
-		return make([]urlCountPair, 0)
+		return make([]QueryCountPair, 0)
 	}
-	var count int = 5
+	count := 5
 	countStrs, foundCount := params["size"]
 	if foundCount && len(countStrs) > 0 {
 		if parsedCount, parsed := strconv.ParseInt(countStrs[0], 10, 64); parsed != nil {

@@ -82,12 +82,12 @@ func Test_TopNAtDate(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want []urlCountPair
+		want []QueryCountPair
 	}{
 		{
 			"topn 2015",
 			args{trie, []int{2015}, 3},
-			[]urlCountPair{
+			[]QueryCountPair{
 				{"http%3A%2F%2Fwww.getsidekick.com%2Fblog%2Fbody-language-advice", 6675},
 				{"http%3A%2F%2Fwebboard.yenta4.com%2Ftopic%2F568045", 4652},
 				{"http%3A%2F%2Fwebboard.yenta4.com%2Ftopic%2F379035%3Fsort%3D1", 3100},
@@ -96,7 +96,7 @@ func Test_TopNAtDate(t *testing.T) {
 		{
 			"distinct 2015-08-02",
 			args{trie, []int{2015, 8}, 5},
-			[]urlCountPair{
+			[]QueryCountPair{
 				{"http%3A%2F%2Fwww.getsidekick.com%2Fblog%2Fbody-language-advice", 6675},
 				{"http%3A%2F%2Fwebboard.yenta4.com%2Ftopic%2F568045", 4652},
 				{"http%3A%2F%2Fwebboard.yenta4.com%2Ftopic%2F379035%3Fsort%3D1", 3100},
