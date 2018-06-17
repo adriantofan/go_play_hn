@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+// Benchmark_loadData-8   	       1	4111254434 ns/op	1207746736 B/op	 3511168 allocs/op
+// Benchmark_loadData-8   	       1	4011234279 ns/op	1207763984 B/op	 3511256 allocs/op
+
 func Benchmark_loadData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		t, _, _ := readData("hn_logs.tsv")
@@ -15,11 +18,16 @@ func Benchmark_loadData(b *testing.B) {
 	}
 }
 
+// Benchmark_readData-8   	       1	3421675559 ns/op	695082704 B/op	 3446286 allocs/op
+// Benchmark_readData-8   	       1	3530647423 ns/op	695029824 B/op	 3446027 allocs/op
 func Benchmark_readData(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		readData("hn_logs.tsv")
 	}
 }
+
+// 2000	    559765 ns/op	  408466 B/op	    4786 allocs/op
+// 3000	    470646 ns/op	  323041 B/op	    4776 allocs/op
 func Benchmark_computeTops(b *testing.B) {
 	t, _, _ := readData("hn_logs.tsv")
 	b.ResetTimer()
