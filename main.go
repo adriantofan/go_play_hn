@@ -14,7 +14,7 @@ const queryCountURL string = "/1/queries/count/"
 const topNURL string = "/1/queries/popular/"
 
 var config = struct {
-	DateFormat                string
+	dateFormat                string
 	logFatal                  func(v ...interface{})
 	trie                      Trie
 	logCount                  int

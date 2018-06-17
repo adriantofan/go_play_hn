@@ -17,7 +17,7 @@ func LogDateComponents(date time.Time) [6]int {
 
 // ParseTime parse a time from string having the default format and returns a time.Time in UTC
 func ParseTime(s string) time.Time {
-	t, _ := time.Parse(config.DateFormat, s)
+	t, _ := time.Parse(config.dateFormat, s)
 	return t.UTC()
 }
 

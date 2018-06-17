@@ -30,7 +30,7 @@ func parseRecord(line []string) (t time.Time, url string, err error) {
 		err = errors.New("TSV line must contain two elements")
 		return
 	}
-	t, err = time.Parse(config.DateFormat, line[0])
+	t, err = time.Parse(config.dateFormat, line[0])
 	if err != nil {
 		return
 	}
