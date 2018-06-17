@@ -13,7 +13,7 @@ func TestTrie_AddLog(t *testing.T) {
 	nodeCount := 0
 	termCount := 0
 	wantedNodeCount := 6
-	wantedTermCount := 12
+	wantedTermCount := 10
 	trie.Visit(func(pTrieNode *TrieNode) {
 		nodeCount++
 		if count, foundURL := pTrieNode.logCounts["term"]; foundURL {

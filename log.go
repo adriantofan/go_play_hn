@@ -5,9 +5,22 @@ import (
 	"time"
 )
 
-// AddLog navigates the trie down and adds the url to each date component
-func (n *TrieNode) AddLog(components []int, url string) {
+// AddLogGeneric_Slow navigates the trie down and adds the url to each date component
+func (n *TrieNode) AddLogGeneric_Slower(components []int, url string) {
 	n.logCounts.increase(url)
+	// add the url to subsequent levels
+	if len(components) != 1 {
+		n.getOrMake(components[0]).AddLog(components[1:], url)
+	}
+}
+
+// AddLog navigates the trie down and adds the url to each date component
+
+func (n *TrieNode) AddLog(components []int, url string) {
+	// do not add at top level url
+	if len(components) != 6 {
+		n.logCounts.increase(url)
+	}
 	// add the url to subsequent levels
 	if len(components) != 1 {
 		n.getOrMake(components[0]).AddLog(components[1:], url)
